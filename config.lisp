@@ -6,33 +6,20 @@
 
 (in-package #:org.shirakumo.ubiquitous)
 
-(defun value (&rest path)
-  (loop with object = *storage*
-        for branch in path
-        do (multiple-value-bind (value found) (field object branch)
-             (if found
-                 (setf object value)
-                 (return (values NIL NIL))))
-        finally (return (values object T))))
+(defvar *commit* T)
 
-(defun (setf value) (value &rest path)
-  (cond (path
-         (loop with object = *storage*
-               for cons on path
-               for branch = (car cons)
-               while (cdr cons)
-               do (multiple-value-bind (value found) (field object branch)
-                    (if found
-                        (setf object value)
-                        (setf object (augment object branch (cadr cons)))))
-               finally (setf (field object branch) value)))
-        (T
-         (setf *storage* value)))
-  (offload)
-  value)
+(defgeneric value (&rest path)
+  (:method (&rest path)
+    (loop with object = *storage*
+          for branch in path
+          do (multiple-value-bind (value found) (field object branch)
+               (if found
+                   (setf object value)
+                   (return (values NIL NIL))))
+          finally (return (values object T)))))
 
-(defun remvalue (&rest path)
-  (let (found)
+(defgeneric (setf value) (value &rest path)
+  (:method (value &rest path)
     (cond (path
            (loop with object = *storage*
                  for cons on path
@@ -41,16 +28,54 @@
                  do (multiple-value-bind (value found) (field object branch)
                       (if found
                           (setf object value)
-                          (return)))
-                 finally (setf found (nth-value 1 (remfield object branch)))))
+                          (setf object (augment object branch (cadr cons)))))
+                 finally (setf (field object branch) value)))
           (T
-           (setf *storage* (make-hash-table :test 'equal))
-           (setf found T)))
-    (offload)
-    (values *storage* found)))
+           (setf *storage* value)))
+    (when *commit*
+      (offload))
+    value))
 
-(defun defaulted-value (default &rest path)
-  (multiple-value-bind (value found) (apply #'value path)
-    (if found
-        value
-        (apply #'(setf value) default path))))
+(defgeneric remvalue (&rest path)
+  (:method (&rest path)
+    (let (found)
+      (cond (path
+             (loop with object = *storage*
+                   for cons on path
+                   for branch = (car cons)
+                   while (cdr cons)
+                   do (multiple-value-bind (value found) (field object branch)
+                        (if found
+                            (setf object value)
+                            (return)))
+                   finally (setf found (nth-value 1 (remfield object branch)))))
+            (T
+             (setf *storage* (make-hash-table :test 'equal))
+             (setf found T)))
+      (when *commit*
+        (offload))
+      (values *storage* found))))
+
+(defgeneric defaulted-value (default &rest path)
+  (:method (default &rest path)
+    (multiple-value-bind (value found) (apply #'value path)
+      (if found
+          value
+          (apply #'(setf value) default path)))))
+
+(defgeneric call-with-transaction (function &key storage type designator)
+  (:method (function &key storage type designator)
+    (let ((*commit* NIL)
+          (*storage* (or storage *storage*))
+          (*storage-type* (or type *storage-type*))
+          (*storage-pathname* (or designator *storage-pathname*)))
+      (unwind-protect
+           (funcall function)
+        (offload)))))
+
+(defmacro with-transaction ((&key storage type designator) &body body)
+  `(call-with-transaction
+    (lambda () ,@body)
+    :storage ,storage
+    :type ,type
+    :designator ,designator))
