@@ -52,7 +52,7 @@
             (T
              (setf *storage* (make-hash-table :test 'equal))
              (setf found T)))
-      (when *commit*
+      (when (and found *commit*)
         (offload))
       (values *storage* found))))
 
