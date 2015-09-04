@@ -117,6 +117,9 @@
 (define-ubiquitous-writer standard-class (object)
   (list (class-name object)))
 
+(define-ubiquitous-writer package (object)
+  (list (package-name object)))
+
 (define-ubiquitous-reader hash-table (form)
   (destructuring-bind (test . vals) form
     (let ((table (make-hash-table :test test)))
@@ -133,6 +136,9 @@
 
 (define-ubiquitous-reader standard-class (form)
   (find-class (first form)))
+
+(define-ubiquitous-reader package (form)
+  (find-package (first form)))
 
 (defmethod read-storage ((type (eql :lisp)) stream)
   (let ((*readtable* *ubiquitous-read-table*))
