@@ -174,6 +174,22 @@ Defaults to :LISP
 Only used as a discerning argument to READ/WRITE-STORAGE.</pre>
                   </article>
                 </li><li>
+                  <a name="UBIQUITOUS:NO-STORAGE-FILE"/>
+                  <article>
+                    <header class="condition">
+                      <span class="type">condition</span>
+                      <code>
+                        <h4><a href="#UBIQUITOUS:NO-STORAGE-FILE" class="name">NO-STORAGE-FILE</a></h4>
+                        <span class="qualifiers"></span>
+                        <span class="arguments">()</span>
+                      </code>
+                    </header>
+                    <pre class="docstring">Warning condition signalled when the storage FILE to be RESTOREd does not exist.
+
+See FILE
+See RESTORE</pre>
+                  </article>
+                </li><li>
                   <a name="UBIQUITOUS:FIELD"/>
                   <article>
                     <header class="accessor">
@@ -192,6 +208,19 @@ to read a field, an equivalent SETF method must not necessarily exist.
 
 Note that if there is no matching method to look up the requested field, an error
 is signalled.</pre>
+                  </article>
+                </li><li>
+                  <a name="UBIQUITOUS:FILE"/>
+                  <article>
+                    <header class="accessor">
+                      <span class="type">accessor</span>
+                      <code>
+                        <h4><a href="#UBIQUITOUS:FILE" class="name">FILE</a></h4>
+                        <span class="qualifiers"></span>
+                        <span class="arguments">(CONDITION)</span>
+                      </code>
+                    </header>
+                    <pre class="docstring">To be used on NO-STORAGE-FILE, returns the pathname to the file that could not be found.</pre>
                   </article>
                 </li><li>
                   <a name="UBIQUITOUS:VALUE"/>
@@ -369,6 +398,9 @@ actual file to avoid potential errors or interruptions that would result
 
 This sets *STORAGE-TYPE*, and *STORAGE-PATHNAME*
 
+During OFFLOAD, the following restarts are active:
+   ABORT  Aborts and does not set any of the usual variables.
+
 See *STORAGE*
 See *STORAGE-TYPE*
 See *STORAGE-PATHNAME*
@@ -444,13 +476,20 @@ The file used to read the storage is calculated by passing
 DESIGNATOR (defaulting to *STORAGE-PATHNAME*) and TYPE (defaulting to
 *STORAGE-TYPE*) to DESIGNATOR-PATHNAME. If it exists, a stream is opened
 and subsequently passed to READ-STORAGE. The result thereof is used as
-the new storage object.
+the new storage object. If it does not exist, a warning of type 
+NO-STORAGE-FILE is signalled and a new EQUAL hash-table is used for the
+storage object (unless a restart is invoked of course).
 
 This sets *STORAGE*, *STORAGE-TYPE*, and *STORAGE-PATHNAME*
+
+During OFFLOAD, the following restarts are active:
+  USE-NEW-STORAGE  Takes one argument to use as the new storage instead.
+  ABORT            Aborts and does not set any of the usual variables.
 
 See *STORAGE*
 See *STORAGE-TYPE*
 See *STORAGE-PATHNAME*
+See NO-STORAGE-FILE
 See DESIGNATOR-PATHNAME
 See READ-STORAGE</pre>
                   </article>
@@ -493,6 +532,19 @@ Returns the written STORAGE object.</pre>
                       </code>
                     </header>
                     <pre class="docstring">Define a new function that produces a list of objects to be written to reproduce OBJECT of TYPE.</pre>
+                  </article>
+                </li><li>
+                  <a name="UBIQUITOUS:WITH-STORAGE"/>
+                  <article>
+                    <header class="macro">
+                      <span class="type">macro</span>
+                      <code>
+                        <h4><a href="#UBIQUITOUS:WITH-STORAGE" class="name">WITH-STORAGE</a></h4>
+                        <span class="qualifiers"></span>
+                        <span class="arguments">((STORAGE) &amp;BODY BODY)</span>
+                      </code>
+                    </header>
+                    <pre class="docstring">Binds *STORAGE* to the given STORAGE object, ensuring a local configuration.</pre>
                   </article>
                 </li><li>
                   <a name="UBIQUITOUS:WITH-TRANSACTION"/>
