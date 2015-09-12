@@ -17,6 +17,10 @@
   (call-next-method)
   storage)
 
+(defmacro with-storage ((storage) &body body)
+  `(let ((*storage* ,storage))
+     ,@body))
+
 (defgeneric restore (&optional designator type)
   (:method (&optional (designator *storage-pathname*) (type *storage-type*))
     (let ((pathname (designator-pathname designator type)))

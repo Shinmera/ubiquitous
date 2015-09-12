@@ -168,6 +168,9 @@ Returns the read storage object.")
    "Writes the STORAGE object to STREAM in a format suitable for TYPE.
 Returns the written STORAGE object.")
 
+  ((with-storage)
+   "Binds *STORAGE* to the given STORAGE object, ensuring a local configuration.")
+
   (restore
    "Restores *STORAGE* by reading it from file if possible and returns it.
 

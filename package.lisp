@@ -33,6 +33,7 @@
    #:*storage-pathname*
    #:read-storage
    #:write-storage
+   #:with-storage
    #:restore
    #:offload
    #:define-ubiquitous-writer
