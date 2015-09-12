@@ -31,7 +31,10 @@
    #:*storage*
    #:*storage-type*
    #:*storage-pathname*
+   #:no-storage-file
+   #:file
    #:read-storage
+   #:use-new-storage
    #:write-storage
    #:with-storage
    #:restore

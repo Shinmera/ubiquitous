@@ -21,16 +21,28 @@
   `(let ((*storage* ,storage))
      ,@body))
 
+(define-condition no-storage-file (warning)
+  ((file :initarg :file :accessor file))
+  (:default-initargs :file (error "FILE required."))
+  (:report (lambda (c s) (format s "Requested storage file ~s does not exist." (file c)))))
+
 (defgeneric restore (&optional designator type)
   (:method (&optional (designator *storage-pathname*) (type *storage-type*))
-    (let ((pathname (designator-pathname designator type)))
-      (with-open-file (stream pathname :direction :input :if-does-not-exist NIL)
-        (if stream
-            (setf *storage* (read-storage type stream))
-            (remvalue)))
-      (setf *storage-pathname* pathname)
-      (setf *storage-type* type)
-      *storage*)))
+    (with-simple-restart (abort "Abort the RESTORE operation.")
+      (let ((pathname (designator-pathname designator type)))
+        (with-open-file (stream pathname :direction :input :if-does-not-exist NIL)
+          (setf *storage* (if stream
+                              (read-storage type stream)
+                              (restart-case
+                                  (progn (warn 'no-storage-file :file pathname)
+                                         (make-hash-table :test 'equal))
+                                (use-new-storage (value)
+                                  :report "Use a new object for storage"
+                                  :interactive (lambda () (read *query-io*))
+                                  value)))))
+        (setf *storage-pathname* pathname)
+        (setf *storage-type* type)))
+    *storage*))
 
 (defgeneric offload (&optional designator type storage)
   (:method (&optional (designator *storage-pathname*) (type *storage-type*) (storage *storage*))

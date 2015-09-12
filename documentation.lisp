@@ -171,6 +171,15 @@ Returns the written STORAGE object.")
   ((with-storage)
    "Binds *STORAGE* to the given STORAGE object, ensuring a local configuration.")
 
+  ((no-storage-file type)
+   "Warning condition signalled when the storage FILE to be RESTOREd does not exist.
+
+See FILE
+See RESTORE")
+
+  (file
+   "To be used on NO-STORAGE-FILE, returns the pathname to the file that could not be found.")
+
   (restore
    "Restores *STORAGE* by reading it from file if possible and returns it.
 
@@ -178,13 +187,20 @@ The file used to read the storage is calculated by passing
 DESIGNATOR (defaulting to *STORAGE-PATHNAME*) and TYPE (defaulting to
 *STORAGE-TYPE*) to DESIGNATOR-PATHNAME. If it exists, a stream is opened
 and subsequently passed to READ-STORAGE. The result thereof is used as
-the new storage object.
+the new storage object. If it does not exist, a warning of type 
+NO-STORAGE-FILE is signalled and a new EQUAL hash-table is used for the
+storage object (unless a restart is invoked of course).
 
 This sets *STORAGE*, *STORAGE-TYPE*, and *STORAGE-PATHNAME*
+
+During READ-STORAGE, the following restarts are active:
+  USE-NEW-STORAGE  Takes one argument to use as the new storage instead.
+  ABORT            Aborts and does not set any of the usual variables.
 
 See *STORAGE*
 See *STORAGE-TYPE*
 See *STORAGE-PATHNAME*
+See NO-STORAGE-FILE
 See DESIGNATOR-PATHNAME
 See READ-STORAGE")
 
