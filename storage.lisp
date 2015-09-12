@@ -21,7 +21,9 @@
   (:method (&optional (designator *storage-pathname*) (type *storage-type*))
     (let ((pathname (designator-pathname designator type)))
       (with-open-file (stream pathname :direction :input :if-does-not-exist NIL)
-        (when stream (setf *storage* (read-storage type stream))))
+        (if stream
+            (setf *storage* (read-storage type stream))
+            (remvalue)))
       (setf *storage-pathname* pathname)
       (setf *storage-type* type)
       *storage*)))
