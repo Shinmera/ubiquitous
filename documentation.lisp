@@ -193,7 +193,7 @@ storage object (unless a restart is invoked of course).
 
 This sets *STORAGE*, *STORAGE-TYPE*, and *STORAGE-PATHNAME*
 
-During READ-STORAGE, the following restarts are active:
+During OFFLOAD, the following restarts are active:
   USE-NEW-STORAGE  Takes one argument to use as the new storage instead.
   ABORT            Aborts and does not set any of the usual variables.
 
@@ -216,6 +216,9 @@ actual file to avoid potential errors or interruptions that would result
  in a garbled configuration file.
 
 This sets *STORAGE-TYPE*, and *STORAGE-PATHNAME*
+
+During OFFLOAD, the following restarts are active:
+   ABORT  Aborts and does not set any of the usual variables.
 
 See *STORAGE*
 See *STORAGE-TYPE*

@@ -46,14 +46,15 @@
 
 (defgeneric offload (&optional designator type storage)
   (:method (&optional (designator *storage-pathname*) (type *storage-type*) (storage *storage*))
-    (let* ((pathname (designator-pathname designator type))
-           (temp (make-pathname :type "tmp" :defaults pathname)))
-      (with-open-file (stream temp :direction :output :if-exists :supersede :if-does-not-exist :create)
-        (write-storage *storage-type* stream storage))
-      (rename-file temp pathname)
-      (setf *storage-pathname* pathname)
-      (setf *storage-type* type)
-      *storage*)))
+    (with-simple-restart (abort "Abort the OFFLOAD operation.")
+      (let* ((pathname (designator-pathname designator type))
+             (temp (make-pathname :type "tmp" :defaults pathname)))
+        (with-open-file (stream temp :direction :output :if-exists :supersede :if-does-not-exist :create)
+          (write-storage *storage-type* stream storage))
+        (rename-file temp pathname)
+        (setf *storage-pathname* pathname)
+        (setf *storage-type* type)))
+    *storage*))
 
 ;; Default lisp implementation
 (defvar *ubiquitous-print-table* (copy-pprint-dispatch))
