@@ -129,7 +129,7 @@
 
 (define-ubiquitous-writer standard-object (object)
   (list* (class-name (class-of object))
-         (loop for slot in (class-direct-slots object)
+         (loop for slot in (class-direct-slots (class-of object))
                for name = (slot-definition-name slot)
                collect (list name (slot-value object name)))))
 
