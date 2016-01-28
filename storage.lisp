@@ -72,15 +72,16 @@
   (set-macro-character (char *ubiquitous-char* 0) #'ubiquitous-reader T *ubiquitous-read-table*))
 
 (defun ubiquitous-writer (stream form)
-  (pprint-logical-block (stream form :prefix (subseq *ubiquitous-char* 0 1) :suffix (subseq *ubiquitous-char* 1))
+  (pprint-logical-block (stream form :prefix (subseq *ubiquitous-char* 0 1)
+                                     :suffix (subseq *ubiquitous-char* 1 2))
     (loop for rest on form
           for item = (pprint-pop)
           do (typecase item
                (list
                 (pprint-newline :fill stream)
-                (pprint-linear stream item T NIL)
-                (format stream " "))
-               (T (format stream "~s~@[ ~]" item (cdr rest)))))))
+                (pprint-linear stream item T NIL))
+               (T (format stream "~s" item)))
+             (format stream "~@[ ~]" (cdr rest)))))
 
 (defmacro define-ubiquitous-writer (type (object &optional (priority 10)) &body body)
   (let ((stream (gensym "STREAM")))
