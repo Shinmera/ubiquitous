@@ -82,19 +82,19 @@
                 (format stream " "))
                (T (format stream "~s " item))))))
 
-(defmacro define-ubiquitous-writer (type (object) &body body)
+(defmacro define-ubiquitous-writer (type (object &optional (priority 10)) &body body)
   (let ((stream (gensym "STREAM")))
     `(set-pprint-dispatch ',type (lambda (,stream ,object)
                                    (ubiquitous-writer
                                     ,stream
                                     (list* ',type (progn ,@body))))
-                          0 *ubiquitous-print-table*)))
+                          ,priority *ubiquitous-print-table*)))
 
 (defmacro define-ubiquitous-reader (type (form) &body body)
   `(setf (gethash ',type *ubiquitous-readers*)
          (lambda (,form) ,@body)))
 
-(define-ubiquitous-writer hash-table (object)
+(define-ubiquitous-writer hash-table (object 0)
   (list* (hash-table-test object)
          (loop for k being the hash-keys of object
                for v being the hash-values of object
@@ -127,16 +127,16 @@
   #+sbcl      (sb-mop:slot-definition-name slot)
   #+scl       (clos:slot-definition-name slot))
 
-(define-ubiquitous-writer standard-object (object)
+(define-ubiquitous-writer standard-object (object 0)
   (list* (class-name (class-of object))
          (loop for slot in (class-direct-slots (class-of object))
                for name = (slot-definition-name slot)
                collect (list name (slot-value object name)))))
 
-(define-ubiquitous-writer standard-class (object)
+(define-ubiquitous-writer standard-class (object 0)
   (list (class-name object)))
 
-(define-ubiquitous-writer package (object)
+(define-ubiquitous-writer package (object 0)
   (list (package-name object)))
 
 (define-ubiquitous-reader hash-table (form)
