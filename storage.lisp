@@ -73,14 +73,14 @@
 
 (defun ubiquitous-writer (stream form)
   (pprint-logical-block (stream form :prefix (subseq *ubiquitous-char* 0 1) :suffix (subseq *ubiquitous-char* 1))
-    (loop for item = (pprint-pop)
-          while item
+    (loop for rest on form
+          for item = (pprint-pop)
           do (typecase item
                (list
                 (pprint-newline :fill stream)
                 (pprint-linear stream item T NIL)
                 (format stream " "))
-               (T (format stream "~s " item))))))
+               (T (format stream "~s~@[ ~]" item (cdr rest)))))))
 
 (defmacro define-ubiquitous-writer (type (object &optional (priority 10)) &body body)
   (let ((stream (gensym "STREAM")))
