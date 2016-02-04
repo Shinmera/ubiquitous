@@ -50,6 +50,9 @@ See FIELD"))
 (setdocs
   ((*commit* variable)
    "When non-NIL, an OFFLOAD is performed after a call to (SETF VALUE) or REMVALUE.")
+
+  ((*changed* variable)
+   "When non-NIL it means a change has occurred and the config should be offloaded.")
   
   (value
    "Traverses *STORAGE* by the fields in PATH and returns the value if it can be found.
@@ -82,12 +85,16 @@ See REMFIELD")
 See VALUE")
 
   (call-with-transaction
-   "Calls FUNCTION with *COMMIT* set to NIL and calls OFFLOAD after the function exits.
+   "Calls FUNCTION with *COMMIT* set to NIL and offloads if necessary upon exit.
+
+OFFLOAD is only called if *CHANGED* is non-NIL. Otherwise no change is assumed to
+have taken place and the offload is prevented to avoid unnecessary writing.
 
 The keyword parameters replace the bindings for *STORAGE* *STORAGE-TYPE* and
 *STORAGE-PATHNAME* respectively.
 
 See *COMMIT*
+See *CHANGED*
 See OFFLOAD")
 
   ((with-transaction)
@@ -191,7 +198,7 @@ the new storage object. If it does not exist, a warning of type
 NO-STORAGE-FILE is signalled and a new EQUAL hash-table is used for the
 storage object (unless a restart is invoked of course).
 
-This sets *STORAGE*, *STORAGE-TYPE*, and *STORAGE-PATHNAME*
+This sets *STORAGE*, *STORAGE-TYPE*, *STORAGE-PATHNAME*, and *CHANGED*.
 
 During OFFLOAD, the following restarts are active:
   USE-NEW-STORAGE  Takes one argument to use as the new storage instead.
@@ -200,6 +207,7 @@ During OFFLOAD, the following restarts are active:
 See *STORAGE*
 See *STORAGE-TYPE*
 See *STORAGE-PATHNAME*
+See *CHANGED*
 See NO-STORAGE-FILE
 See DESIGNATOR-PATHNAME
 See READ-STORAGE")
@@ -215,7 +223,7 @@ The file is first written to a temporary one and then renamed to the
 actual file to avoid potential errors or interruptions that would result
  in a garbled configuration file.
 
-This sets *STORAGE-TYPE*, and *STORAGE-PATHNAME*
+This sets *STORAGE-TYPE*, *STORAGE-PATHNAME*, and *CHANGED*.
 
 During OFFLOAD, the following restarts are active:
    ABORT  Aborts and does not set any of the usual variables.
@@ -223,6 +231,7 @@ During OFFLOAD, the following restarts are active:
 See *STORAGE*
 See *STORAGE-TYPE*
 See *STORAGE-PATHNAME*
+See *CHANGED*
 See DESIGNATOR-PATHNAME
 See WRITE-STORAGE")
 

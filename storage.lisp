@@ -41,7 +41,8 @@
                                   :interactive (lambda () (read *query-io*))
                                   value)))))
         (setf *storage-pathname* pathname)
-        (setf *storage-type* type)))
+        (setf *storage-type* type)
+        (setf *changed* NIL)))
     *storage*))
 
 (defgeneric offload (&optional designator type storage)
@@ -53,7 +54,8 @@
           (write-storage *storage-type* stream storage))
         (rename-file temp pathname)
         (setf *storage-pathname* pathname)
-        (setf *storage-type* type)))
+        (setf *storage-type* type)
+        (setf *changed* NIL)))
     *storage*))
 
 ;; Default lisp implementation

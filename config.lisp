@@ -7,6 +7,7 @@
 (in-package #:org.shirakumo.ubiquitous)
 
 (defvar *commit* T)
+(defvar *changed* NIL)
 
 (defgeneric value (&rest path)
   (:method (&rest path)
@@ -32,6 +33,7 @@
                  finally (setf (field object branch) value)))
           (T
            (setf *storage* value)))
+    (setf *changed* T)
     (when *commit*
       (offload))
     value))
@@ -52,8 +54,10 @@
             (T
              (setf *storage* (make-hash-table :test 'equal))
              (setf found T)))
-      (when (and found *commit*)
-        (offload))
+      (when found
+        (setf *changed* T)
+        (when *commit*
+          (offload)))
       (values *storage* found))))
 
 (defgeneric defaulted-value (default &rest path)
@@ -65,13 +69,14 @@
 
 (defgeneric call-with-transaction (function &key storage type designator)
   (:method (function &key storage type designator)
-    (let ((*commit* NIL)
+    (let ((*commit* NIL) (*changed* NIL)
           (*storage* (or storage *storage*))
           (*storage-type* (or type *storage-type*))
           (*storage-pathname* (or designator *storage-pathname*)))
       (unwind-protect
            (funcall function)
-        (offload)))))
+        (when *changed*
+          (offload))))))
 
 (defmacro with-transaction ((&key storage type designator) &body body)
   `(call-with-transaction

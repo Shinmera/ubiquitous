@@ -16,6 +16,7 @@
   ;; config.lisp
   (:export
    #:*commit*
+   #:*changed*
    #:value
    #:remvalue
    #:defaulted-value
