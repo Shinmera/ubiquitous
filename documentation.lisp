@@ -25,12 +25,19 @@ The secondary return value is a boolean depicting whether the field could be fou
 This is SETF-able. However, while some objects and field combinations may be used
 to read a field, an equivalent SETF method must not necessarily exist.
 
+In the case where the object is a function, the function is called as follows:
+ (field func field default)      => (funcall func :get field default)
+ (setf (field func field) value) => (funcall func :set field value) 
+
 Note that if there is no matching method to look up the requested field, an error
 is signalled.")
 
   (remfield
    "Removes FIELD from OBJECT if possible.
 The secondary return value is a boolean depicting whether the field was removed.
+
+In the case where the object is a function, the function is called as follows:
+  (remfield func field)          => (funcall func :remove field)
 
 Note that if there is no matching method to look up the requested field, an error
 is signalled.")

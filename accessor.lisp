@@ -56,6 +56,9 @@
 (defmethod field ((object null) field &optional default)
   (values default NIL))
 
+(defmethod field ((object function) field &optional default)
+  (funcall object :get field default))
+
 (defmethod (setf field) :around (value object field)
   (call-next-method)
   value)
@@ -86,6 +89,9 @@
 
 (defmethod (setf field) (value (object symbol) (field symbol))
   (setf (get object field) value))
+
+(defmethod (setf field) (value (object function) field)
+  (funcall object :set field value))
 
 (defmethod remfield :around (object field)
   (if (call-next-method)
@@ -128,6 +134,9 @@
 
 (defmethod remfield ((object symbol) (field symbol))
   (remprop object field))
+
+(defmethod remfield ((object function) field)
+  (funcall object :remove field))
 
 (defmethod augment (object field (secondary symbol))
   (setf (field object field) (make-hash-table :test 'eql)))
