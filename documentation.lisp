@@ -185,6 +185,34 @@ Returns the written STORAGE object.")
   ((with-storage)
    "Binds *STORAGE* to the given STORAGE object, ensuring a local configuration.")
 
+  (lazy-loader
+   "A function that is to be used as a direct *STORAGE* value to delay the restoring.
+
+When called, the function will call RESTORE and then delegate the given
+action to the proper function (FIELD, (SETF FIELD), REMFIELD) using the
+*STORAGE* as object.
+
+See *STORAGE*
+See FIELD
+See REMFIELD
+See WITH-LOCAL-STORAGE")
+
+  ((with-local-storage)
+   "Useful for completely encapsulating the storage in a local block.
+
+Unlike WITH-STORAGE, this also binds the *STORAGE-TYPE* and
+*STORAGE-PATHNAME*. If TRANSACTION is non-NIL, WITH-TRANSACTION is
+used, and otherwise a simple LET*. STORAGE defaults to the LAZY-LOADER
+function, meaning that if the storage is never accessed, it is never
+loaded to begin with. This, along with WITH-TRANSACTION can be a
+good optimisation to avoid unnecessary disk access.
+
+See *STORAGE*
+See *STORAGE-TYPE*
+See *STORAGE-PATHNAME*
+See WITH-TRANSACTION
+See LAZY-LOADER")
+  
   ((no-storage-file type)
    "Warning condition signalled when the storage FILE to be RESTOREd does not exist.
 

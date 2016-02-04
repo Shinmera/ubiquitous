@@ -21,6 +21,24 @@
   `(let ((*storage* ,storage))
      ,@body))
 
+(defun lazy-loader (action field &optional value)
+  (restore)
+  (ecase action
+    (:get (field *storage* field value))
+    (:set (setf (field *storage* field) value))
+    (:remove (remfield *storage* field))))
+
+(defmacro with-local-storage ((designator &key (type '*storage-type*) (storage '#'lazy-loader) (transaction T)) &body body)
+  (if transaction
+      `(with-transaction (:storage ,storage
+                          :type ,type
+                          :designator ,designator)
+         ,@body)
+      `(let* ((*storage* ,storage)
+              (*storage-type* ,type)
+              (*storage-pathname* ,designator))
+         ,@body)))
+
 (define-condition no-storage-file (warning)
   ((file :initarg :file :accessor file))
   (:default-initargs :file (error "FILE required."))

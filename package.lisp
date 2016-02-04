@@ -38,6 +38,8 @@
    #:use-new-storage
    #:write-storage
    #:with-storage
+   #:lazy-loader
+   #:with-local-storage
    #:restore
    #:offload
    #:define-ubiquitous-writer
