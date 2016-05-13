@@ -122,18 +122,18 @@
                collect (list k v))))
 
 ;; Some MOP portability.
-(defun class-direct-slots (class)
+(defun class-slots (class)
   ()
-  #+abcl      (mop:class-direct-slots class)
-  #+allegro   (mop:class-direct-slots class)
-  #+clisp     (clos:class-direct-slots class)
-  #+clozure   (ccl:class-direct-slots class)
-  #+cmu       (clos-mop:class-direct-slots class)
-  #+ecl       (clos:class-direct-slots class)
-  #+lispworks (clos:class-direct-slots class)
-  #+mcl       (ccl:class-direct-slots class)
-  #+sbcl      (sb-mop:class-direct-slots class)
-  #+scl       (clos:class-direct-slots class))
+  #+abcl      (mop:class-slots class)
+  #+allegro   (mop:class-slots class)
+  #+clisp     (clos:class-slots class)
+  #+clozure   (ccl:class-slots class)
+  #+cmu       (clos-mop:class-slots class)
+  #+ecl       (clos:class-slots class)
+  #+lispworks (clos:class-slots class)
+  #+mcl       (ccl:class-slots class)
+  #+sbcl      (sb-mop:class-slots class)
+  #+scl       (clos:class-slots class))
 
 (defun slot-definition-name (slot)
   ()
@@ -150,7 +150,7 @@
 
 (define-ubiquitous-writer standard-object (object 0)
   (list* (class-name (class-of object))
-         (loop for slot in (class-direct-slots (class-of object))
+         (loop for slot in (class-slots (class-of object))
                for name = (slot-definition-name slot)
                collect (list name (slot-value object name)))))
 
@@ -169,7 +169,7 @@
 
 (define-ubiquitous-reader standard-object (form)
   (destructuring-bind (type . vals) form
-    (let ((object (make-instance type)))
+    (let ((object (allocate-instance type)))
       (loop for (key val) in vals
             do (setf (slot-value object key) val))
       object)))
