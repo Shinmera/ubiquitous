@@ -169,7 +169,7 @@
 
 (define-ubiquitous-reader standard-object (form)
   (destructuring-bind (type . vals) form
-    (let ((object (allocate-instance type)))
+    (let ((object (allocate-instance (find-class type))))
       (loop for (key val) in vals
             do (setf (slot-value object key) val))
       object)))
