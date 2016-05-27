@@ -154,7 +154,16 @@
                for name = (slot-definition-name slot)
                collect (list name (slot-value object name)))))
 
+(define-ubiquitous-writer structure-object (object 0)
+  (list* (class-name (class-of object))
+         (loop for slot in (class-slots (class-of object))
+               for name = (slot-definition-name slot)
+               collect (list name (slot-value object name)))))
+
 (define-ubiquitous-writer standard-class (object 0)
+  (list (class-name object)))
+
+(define-ubiquitous-writer structure-class (object 0)
   (list (class-name object)))
 
 (define-ubiquitous-writer package (object 0)
@@ -174,7 +183,17 @@
             do (setf (slot-value object key) val))
       object)))
 
+(define-ubiquitous-reader structure-object (form)
+  (destructuring-bind (type . vals) form
+    (let ((object (allocate-instance (find-class type))))
+      (loop for (key val) in vals
+            do (setf (slot-value object key) val))
+      object)))
+
 (define-ubiquitous-reader standard-class (form)
+  (find-class (first form)))
+
+(define-ubiquitous-reader structure-class (form)
   (find-class (first form)))
 
 (define-ubiquitous-reader package (form)
