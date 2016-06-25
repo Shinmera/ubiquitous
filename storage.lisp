@@ -89,7 +89,8 @@
       (funcall (or (gethash type *ubiquitous-readers*)
                    (error "Don't know how to read ~s" type))
                args)))
-  (set-macro-character (char *ubiquitous-char* 0) #'ubiquitous-reader T *ubiquitous-read-table*))
+  (set-macro-character (char *ubiquitous-char* 0) #'ubiquitous-reader NIL *ubiquitous-read-table*)
+  (set-macro-character (char *ubiquitous-char* 1) (get-macro-character #\)) NIL *ubiquitous-read-table*))
 
 (defun ubiquitous-writer (stream form)
   (pprint-logical-block (stream form :prefix (subseq *ubiquitous-char* 0 1)
@@ -204,20 +205,21 @@
     (read stream)))
 
 (defmethod write-storage ((type (eql :lisp)) stream storage)
-  (write storage
-         :stream stream
-         :array T
-         :base 10
-         :case :downcase
-         :circle T
-         :escape T
-         :gensym T
-         :length NIL
-         :level NIL
-         :lines NIL
-         :miser-width NIL
-         :pprint-dispatch *ubiquitous-print-table*
-         :pretty T
-         :radix NIL
-         :readably T
-         :right-margin NIL))
+  (let ((*readtable* *ubiquitous-read-table*))
+    (write storage
+           :stream stream
+           :array T
+           :base 10
+           :case :downcase
+           :circle T
+           :escape T
+           :gensym T
+           :length NIL
+           :level NIL
+           :lines NIL
+           :miser-width NIL
+           :pprint-dispatch *ubiquitous-print-table*
+           :pretty T
+           :radix NIL
+           :readably T
+           :right-margin NIL)))
