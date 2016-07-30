@@ -42,5 +42,6 @@
    #:with-local-storage
    #:restore
    #:offload
+   #:destroy
    #:define-ubiquitous-writer
    #:define-ubiquitous-reader))

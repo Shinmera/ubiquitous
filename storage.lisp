@@ -76,6 +76,17 @@
         (setf *changed* NIL)))
     *storage*))
 
+(defgeneric destroy (&optional designator type)
+  (:method (&optional (designator *storage-pathname*) (type *storage-type*))
+    (with-simple-restart (abort "Abort the RESTORE operation.")
+      (let ((pathname (designator-pathname designator type)))
+        (uiop:delete-file-if-exists pathname)
+        (setf *storage* (make-hash-table :test 'equal))
+        (setf *storage-pathname* pathname)
+        (setf *storage-type* type)
+        (setf *changed* NIL)))
+    *storage*))
+
 ;; Default lisp implementation
 (defvar *ubiquitous-print-table* (copy-pprint-dispatch))
 (defvar *ubiquitous-read-table* (copy-readtable))

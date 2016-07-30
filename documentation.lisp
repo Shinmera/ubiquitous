@@ -270,6 +270,21 @@ See *CHANGED*
 See DESIGNATOR-PATHNAME
 See WRITE-STORAGE")
 
+  (destroy
+   "Destroys *STORAGE* by deleting its file and restoring it to an empty hash table.
+
+The file used to destroy the storage is calculated by passing
+DESIGNATOR (defaulting to *STORAGE-PATHNAME*) and TYPE (defaulting to
+*STORAGE-TYPE*) to DESIGNATOR-PATHNAME.
+
+This sets *STORAGE*, *STORAGE-TYPE*, *STORAGE-PATHNAME*, and *CHANGED*.
+
+See *STORAGE*
+See *STORAGE-TYPE*
+See *STORAGE-PATHNAME*
+See *CHANGED*
+See DESIGNATOR-PATHNAME")
+
   ((*ubiquitous-print-table* variable)
    "The pprint-dispatch-table used to write storage objects to file.")
 
