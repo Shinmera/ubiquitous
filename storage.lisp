@@ -70,6 +70,7 @@
              (temp (make-pathname :type "tmp" :defaults pathname)))
         (with-open-file (stream temp :direction :output :if-exists :supersede :if-does-not-exist :create)
           (write-storage *storage-type* stream storage))
+        #+windows (delete-file pathname)
         (rename-file temp pathname)
         (setf *storage-pathname* pathname)
         (setf *storage-type* type)
