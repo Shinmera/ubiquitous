@@ -76,13 +76,13 @@
   (let ((cons (assoc field object)))
     (if cons
         (setf (cdr cons) value)
-        (setf (cdr object) (cons value (cdr object))))))
+        (setf (cdr object) (list* (cons field value) (cdr object))))))
 
 (defmethod (setf field) (value (object list) (field string))
   (let ((cons (assoc field object :test #'string=)))
     (if cons
         (setf (cdr cons) value)
-        (setf (cdr object) (cons value (cdr object))))))
+        (setf (cdr object) (list* (cons field value) (cdr object))))))
 
 (defmethod (setf field) (value (object standard-object) (field symbol))
   (setf (slot-value object field) value))
