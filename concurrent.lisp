@@ -86,7 +86,7 @@
 ;; and (REMFIELD).
 (defmethod (setf field) :around (value object field)
   (superior-lock-next-method-call object)
-  object)
+  value)
 
 (defmethod remfield :around (object field)
   (if (superior-lock-next-method-call object)
