@@ -163,6 +163,9 @@
   #+sbcl      (sb-mop:slot-definition-name slot)
   #+scl       (clos:slot-definition-name slot))
 
+(set-pprint-dispatch 'string (lambda (s o) (write o :stream s :readably NIL))
+                     10 *ubiquitous-print-table*)
+
 (define-ubiquitous-writer standard-object (object 0)
   (list* (class-name (class-of object))
          (loop for slot in (class-slots (class-of object))
