@@ -115,8 +115,8 @@
                (list
                 (pprint-newline :fill stream)
                 (pprint-linear stream item T NIL))
-               (T (format stream "~s" item)))
-             (format stream "~@[ ~]" (cdr rest)))))
+               (T (write item :stream stream)))
+             (when (cdr rest) (write-string " " stream)))))
 
 (defmacro define-ubiquitous-writer (type (object &optional (priority 10)) &body body)
   (let ((stream (gensym "STREAM")))
@@ -162,9 +162,6 @@
   #+mcl       (ccl:slot-definition-name slot)
   #+sbcl      (sb-mop:slot-definition-name slot)
   #+scl       (clos:slot-definition-name slot))
-
-(set-pprint-dispatch 'string (lambda (s o) (write o :stream s :readably NIL))
-                     10 *ubiquitous-print-table*)
 
 (define-ubiquitous-writer standard-object (object 0)
   (list* (class-name (class-of object))
