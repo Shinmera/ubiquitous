@@ -136,7 +136,7 @@
                        (format stream "#p~s" (namestring object)))
                      1000 *ubiquitous-print-table*)
 
-(define-ubiquitous-writer hash-table (object 0)
+(define-ubiquitous-writer hash-table (object 1000)
   (list* (hash-table-test object)
          (loop for k being the hash-keys of object
                for v being the hash-values of object
@@ -169,26 +169,26 @@
   #+sbcl      (sb-mop:slot-definition-name slot)
   #+scl       (clos:slot-definition-name slot))
 
-(define-ubiquitous-writer standard-object (object 1000)
-  (list* (class-name (class-of object))
-         (loop for slot in (class-slots (class-of object))
-               for name = (slot-definition-name slot)
-               collect (list name (slot-value object name)))))
-
-(define-ubiquitous-writer structure-object (object 1000)
-  (list* (class-name (class-of object))
-         (loop for slot in (class-slots (class-of object))
-               for name = (slot-definition-name slot)
-               collect (list name (slot-value object name)))))
-
-(define-ubiquitous-writer standard-class (object 1000)
-  (list (class-name object)))
-
-(define-ubiquitous-writer structure-class (object 1000)
-  (list (class-name object)))
-
-(define-ubiquitous-writer package (object 1000)
+(define-ubiquitous-writer package (object 0999)
   (list (package-name object)))
+
+(define-ubiquitous-writer structure-class (object 0998)
+  (list (class-name object)))
+
+(define-ubiquitous-writer standard-class (object 0997)
+  (list (class-name object)))
+
+(define-ubiquitous-writer structure-object (object 0996)
+  (list* (class-name (class-of object))
+         (loop for slot in (class-slots (class-of object))
+               for name = (slot-definition-name slot)
+               collect (list name (slot-value object name)))))
+
+(define-ubiquitous-writer standard-object (object 0995)
+  (list* (class-name (class-of object))
+         (loop for slot in (class-slots (class-of object))
+               for name = (slot-definition-name slot)
+               collect (list name (slot-value object name)))))
 
 (define-ubiquitous-reader hash-table (form)
   (destructuring-bind (test . vals) form
