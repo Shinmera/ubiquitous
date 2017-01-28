@@ -130,6 +130,12 @@
   `(setf (gethash ',type *ubiquitous-readers*)
          (lambda (,form) ,@body)))
 
+;; Ensure pathnames are being printed as namestrings
+(set-pprint-dispatch 'pathname
+                     (lambda (stream object)
+                       (format stream "#p~s" (namestring object)))
+                     0 *ubiquitous-print-table*)
+
 (define-ubiquitous-writer hash-table (object 0)
   (list* (hash-table-test object)
          (loop for k being the hash-keys of object
