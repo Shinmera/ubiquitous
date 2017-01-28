@@ -118,7 +118,7 @@
                (T (write item :stream stream)))
              (when (cdr rest) (write-string " " stream)))))
 
-(defmacro define-ubiquitous-writer (type (object &optional (priority 10)) &body body)
+(defmacro define-ubiquitous-writer (type (object &optional (priority 2000)) &body body)
   (let ((stream (gensym "STREAM")))
     `(set-pprint-dispatch ',type (lambda (,stream ,object)
                                    (ubiquitous-writer
@@ -134,7 +134,7 @@
 (set-pprint-dispatch 'pathname
                      (lambda (stream object)
                        (format stream "#p~s" (namestring object)))
-                     0 *ubiquitous-print-table*)
+                     1000 *ubiquitous-print-table*)
 
 (define-ubiquitous-writer hash-table (object 0)
   (list* (hash-table-test object)
@@ -169,25 +169,25 @@
   #+sbcl      (sb-mop:slot-definition-name slot)
   #+scl       (clos:slot-definition-name slot))
 
-(define-ubiquitous-writer standard-object (object 0)
+(define-ubiquitous-writer standard-object (object 1000)
   (list* (class-name (class-of object))
          (loop for slot in (class-slots (class-of object))
                for name = (slot-definition-name slot)
                collect (list name (slot-value object name)))))
 
-(define-ubiquitous-writer structure-object (object 0)
+(define-ubiquitous-writer structure-object (object 1000)
   (list* (class-name (class-of object))
          (loop for slot in (class-slots (class-of object))
                for name = (slot-definition-name slot)
                collect (list name (slot-value object name)))))
 
-(define-ubiquitous-writer standard-class (object 0)
+(define-ubiquitous-writer standard-class (object 1000)
   (list (class-name object)))
 
-(define-ubiquitous-writer structure-class (object 0)
+(define-ubiquitous-writer structure-class (object 1000)
   (list (class-name object)))
 
-(define-ubiquitous-writer package (object 0)
+(define-ubiquitous-writer package (object 1000)
   (list (package-name object)))
 
 (define-ubiquitous-reader hash-table (form)
