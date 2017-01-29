@@ -136,6 +136,17 @@
                        (format stream "#p~s" (namestring object)))
                      1000 *ubiquitous-print-table*)
 
+(set-pprint-dispatch 'string
+                     (lambda (stream object)
+                       (write-char #\" stream)
+                       (unwind-protect
+                            (loop for char across object
+                                  do (when (or (char= char #\\) (char= char #\"))
+                                       (write-char #\\ stream))
+                                     (write-char char stream))
+                         (write-char #\" stream)))
+                     1000 *ubiquitous-print-table*)
+
 (define-ubiquitous-writer hash-table (object 1000)
   (list* (hash-table-test object)
          (loop for k being the hash-keys of object
