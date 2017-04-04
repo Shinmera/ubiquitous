@@ -6,38 +6,41 @@
           font-size: 14pt;
           padding: 5px;
       }
-
       body>header{
           display:flex;
           align-items: center;
           justify-content: center;
           flex-direction: column;
           max-width: 100%;
+          text-align: center;
       }
-
+      body>header img{
+          max-width: 50%;
+      }
       img{
           max-width: 100%;
           max-height: 100%;
       }
-
       code{
           font-family: Consolas, Inconsolata, monospace;
       }
-
       a{
           text-decoration: none;
           color: #0055AA;
       }
-
+      a img{
+          border: none;
+      }
       #documentation{
           text-align: justify;
       }
-
       #documentation pre{
           margin-left: 20px;
           overflow: auto;
       }
-
+      #documentation img{
+          margin: 5px;
+      }
       #symbol-index>ul{
           list-style: none;
           padding: 0;
@@ -68,10 +71,9 @@
           white-space: pre-wrap;
           font-size: 12pt;
       }
-
       @media (max-width: 800px){
           body{font-size: 12pt;}
-      } </style> </head> <body> <header> <h1><img alt="ubiquitous" src="ubiquitous-logo.png"/></h1> <span class="version">1.2.0</span> <p class="description">A library providing a universal application configuration mechanism.</p> </header> <main> <article id="documentation">  <div><h2>About Ubiquitous</h2> <p>Ubiquitous is a very easy-to-use library for persistent configuration storage. It automatically takes care of finding a suitable place to save your data, and provides simple functions to access and modify the data within.</p> <h2>How To</h2> <p>Load ubiquitous through ASDF or Quicklisp.</p> <pre><code>(ql:quickload :ubiquitous)
+      } </style> </head> <body> <header> <h1><img alt="ubiquitous" src="ubiquitous-logo.png"/></h1> <span class="version">1.2.3</span> <p class="description">A library providing a universal application configuration mechanism.</p> </header> <main> <article id="documentation">  <div><h2>About Ubiquitous</h2> <p>Ubiquitous is a very easy-to-use library for persistent configuration storage. It automatically takes care of finding a suitable place to save your data, and provides simple functions to access and modify the data within.</p> <h2>How To</h2> <p>Load ubiquitous through ASDF or Quicklisp.</p> <pre><code>(ql:quickload :ubiquitous)
 </code></pre> <p>The main functions you will be using are <code><a href="#UBIQUITOUS:RESTORE">restore</a></code>, and <code><a href="#UBIQUITOUS:VALUE">value</a></code>. The former loads the configuration according to a designator, and the latter is an accessor allowing you to retrieve and set properties.</p> <pre><code>(<a href="#UBIQUITOUS:RESTORE">restore</a> 'my-config)
 (<a href="http://l1sp.org/cl/setf">setf</a> (<a href="#UBIQUITOUS:VALUE">value</a> :test) &quot;hi!&quot;)
 (<a href="#UBIQUITOUS:VALUE">value</a> :test)
@@ -79,18 +81,18 @@
 </code></pre> <p>Often times for configuration one might want to specify a default value to use.</p> <pre><code>(<a href="#UBIQUITOUS:DEFAULTED-VALUE">defaulted-value</a> &quot;localhost&quot; :hostname)
 </code></pre> <p>In case you need to remove a value, there's <code><a href="#UBIQUITOUS:REMVALUE">remvalue</a></code>.</p> <pre><code>(<a href="#UBIQUITOUS:REMVALUE">remvalue</a> 'something 'that 'goes 6 'levels 'deep)
 </code></pre> <p>By default, an extended s-expression format is used to store things in a file. If you need a different format, you can add methods to <code><a href="#UBIQUITOUS:READ-STORAGE">read-storage</a></code> and <code><a href="#UBIQUITOUS:WRITE-STORAGE">write-storage</a></code>, and set <code><a href="#UBIQUITOUS:*STORAGE-TYPE*">*storage-type*</a></code> to your type name. Since <code>(<a href="http://l1sp.org/cl/setf">setf</a> value)</code> automatically calls <code><a href="#UBIQUITOUS:OFFLOAD">offload</a></code> to persist the storage, this might lead to a lot of saving all over the place. In order to avoid this, you can bundle a block of operations in a <code><a href="#UBIQUITOUS:WITH-TRANSACTION">with-transaction</a></code> form, which will only perform an <code><a href="#UBIQUITOUS:OFFLOAD">offload</a></code> once the block exits.</p> <p>Ubiquitous in itself does not have any external dependencies, so you may also bundle it into a singular file to just <code><a href="http://l1sp.org/cl/load">load</a></code> using ASDF:</p> <pre><code>(asdf:operate :build-op :ubiquitous)
-</code></pre> <p>Which will produce an independent <code>ubiquitous.lisp</code> file in <code>(asdf:system-source-directory :ubiquitous)</code>.</p> <h2>Concurrency</h2> <p>By default Ubiquitous does not try to handle concurrent access in any way. The reason for this is not laziness, but merely the desire to avoid dependencies for those that don't need it. However, if you require safe concurrent access and handling of the storage, simply load <code>ubiquitous-concurrent</code> instead of <code>ubiquitous</code>. This will also pull in <code>bordeaux-threads</code> and establish additional methods around the standard definitions that will ensure concurrency safety.</p> <p>This will still work irregardless of how many different storage objects you use, as the locking on the operations happens on the currently accessed storage object itself, rather than on a global lock. In order to avoid needless locking and unlocking, you should bundle your operations into a <code><a href="#UBIQUITOUS:WITH-TRANSACTION">with-transaction</a></code> block, which will only perform a lock once.</p> <h2>Shortcomings</h2> <p>A couple of shortcomings exist in Ubiquitous, almost by necessity. As you might know out of experience, certain modifying operations are not possible to do without being able to modify the container of the object itself. As an example, <code><a href="http://l1sp.org/cl/pop">pop</a></code>ing an element off the head of the list requires setting the variable that contains the list, rather than the list itself. This sort of thing is rather annoying to model in a generic manner without complicating the common case needlessly. Furthermore, in a couple of instances ambiguity arises due to multiple actions being possible.</p> <p>In detail, the following operations are supported suboptimally, or not at all:</p> <ul> <li><code><a href="#UBIQUITOUS:REMFIELD">remfield</a></code> on a <code><a href="http://l1sp.org/cl/list">list</a></code> with one element left that is to be removed. The <code><a href="http://l1sp.org/cl/car">car</a></code> of the cons will simply be set to <code>NIL</code>.</li> <li><code><a href="#UBIQUITOUS:REMFIELD">remfield</a></code> on a <code><a href="http://l1sp.org/cl/vector">vector</a></code>. This would require shifting fields and potentially adjusting it. The desired effect cannot be estimated and so Ubiquitous does not support the operation at all.</li> <li><code><a href="#UBIQUITOUS:REMFIELD">remfield</a></code> on a <code><a href="http://l1sp.org/cl/standard-object">standard-object</a></code>, as class-slots cannot be removed without the MOP and you probably wouldn't want that to happen anyway.</li> <li><code><a href="http://l1sp.org/cl/setf">setf</a></code> <code><a href="#UBIQUITOUS:FIELD">field</a></code> on a <code><a href="http://l1sp.org/cl/list">list</a></code> or <code><a href="http://l1sp.org/cl/vector">vector</a></code> where the field is an index exceeding the length. In this case, an error is signalled as extending the object to the required length might not be a desired or possible effect.</li> <li><code><a href="http://l1sp.org/cl/setf">setf</a></code> <code><a href="#UBIQUITOUS:FIELD">field</a></code> on a <code><a href="http://l1sp.org/cl/list">list</a></code> where the field is a symbol or string. Lists are commonly used as alists or plists. Ubiquitous strictly expects alists.</li> </ul> <p>Another shortcoming is in the department of serialisation. Ubiquitous does not try to be overly smart about things, which especially comes into effect when serialising <code><a href="http://l1sp.org/cl/standard-object">standard-object</a></code>s. Ubiquitous saves the class' slots and restores it by calling <code><a href="http://l1sp.org/cl/allocate-instance">allocate-instance</a></code> without initargs and then <code>setf slot-value</code>-ing one slot after the other. If you need more tailored support for serialising your object, you must extend <code><a href="#UBIQUITOUS:DEFINE-UBIQUITOUS-READER">define-ubiquitous-reader</a></code> and <code><a href="#UBIQUITOUS:DEFINE-UBIQUITOUS-WRITER">define-ubiquitous-writer</a></code>, or write a new storage format altogether. Furthermore, since the default behaviour is to use the lisp printer and reader (with special handling for <code><a href="http://l1sp.org/cl/hash-table">hash-table</a></code>, <code><a href="http://l1sp.org/cl/standard-object">standard-object</a></code>, <code><a href="http://l1sp.org/cl/standard-class">standard-class</a></code>, and <code><a href="http://l1sp.org/cl/package">package</a></code>) to serialise objects, several things might get lost in translation, such as the fill-pointer and adjustability of a vector.</p> </div>  </article> <article id="copyright">  <h2>Copyright</h2> <span>ubiquitous</span> is licensed under the <span><a href="https://tldrlegal.com/search?q=Artistic">Artistic</a></span> license.  © <span>Nicolas Hafner &lt;shinmera@tymoon.eu&gt;</span> .  This library can be obtained on <a href="https://github.com/Shinmera/ubiquitous">https://github.com/Shinmera/ubiquitous</a>.  </article>  <article id="symbol-index"> <h2>Package Index</h2> <ul><li class="package"> <h3> <a name="UBIQUITOUS" href="#UBIQUITOUS">UBIQUITOUS</a> <span class="nicknames">(ORG.SHIRAKUMO.UBIQUITOUS)</span> </h3> <ul><li> <a name="UBIQUITOUS:*CHANGED*"> </a> <article> <header class="special"> <span class="type">special</span>  <h4 class="name"><code><a href="#UBIQUITOUS:*CHANGED*">*CHANGED*</a></code></h4>  </header> <pre class="docstring">When non-NIL it means a change has occurred and the config should be offloaded.</pre> </article> </li><li> <a name="UBIQUITOUS:*COMMIT*"> </a> <article> <header class="special"> <span class="type">special</span>  <h4 class="name"><code><a href="#UBIQUITOUS:*COMMIT*">*COMMIT*</a></code></h4>  </header> <pre class="docstring">When non-NIL, an OFFLOAD is performed after a call to (SETF VALUE) or REMVALUE.</pre> </article> </li><li> <a name="UBIQUITOUS:*STORAGE*"> </a> <article> <header class="special"> <span class="type">special</span>  <h4 class="name"><code><a href="#UBIQUITOUS:*STORAGE*">*STORAGE*</a></code></h4>  </header> <pre class="docstring">Special variable containing the current root storage object.
-Defaults to an EQUAL hash-table.</pre> </article> </li><li> <a name="UBIQUITOUS:*STORAGE-PATHNAME*"> </a> <article> <header class="special"> <span class="type">special</span>  <h4 class="name"><code><a href="#UBIQUITOUS:*STORAGE-PATHNAME*">*STORAGE-PATHNAME*</a></code></h4>  </header> <pre class="docstring">The pathname for the file where the current *STORAGE* is stored.
+</code></pre> <p>Which will produce an independent <code>ubiquitous.lisp</code> file in <code>(asdf:system-source-directory :ubiquitous)</code>.</p> <h2>Concurrency</h2> <p>By default Ubiquitous does not try to handle concurrent access in any way. The reason for this is not laziness, but merely the desire to avoid dependencies for those that don't need it. However, if you require safe concurrent access and handling of the storage, simply load <code>ubiquitous-concurrent</code> instead of <code>ubiquitous</code>. This will also pull in <code>bordeaux-threads</code> and establish additional methods around the standard definitions that will ensure concurrency safety.</p> <p>This will still work irregardless of how many different storage objects you use, as the locking on the operations happens on the currently accessed storage object itself, rather than on a global lock. In order to avoid needless locking and unlocking, you should bundle your operations into a <code><a href="#UBIQUITOUS:WITH-TRANSACTION">with-transaction</a></code> block, which will only perform a lock once.</p> <h2>Shortcomings</h2> <p>A couple of shortcomings exist in Ubiquitous, almost by necessity. As you might know out of experience, certain modifying operations are not possible to do without being able to modify the container of the object itself. As an example, <code><a href="http://l1sp.org/cl/pop">pop</a></code>ing an element off the head of the list requires setting the variable that contains the list, rather than the list itself. This sort of thing is rather annoying to model in a generic manner without complicating the common case needlessly. Furthermore, in a couple of instances ambiguity arises due to multiple actions being possible.</p> <p>In detail, the following operations are supported suboptimally, or not at all:</p> <ul> <li><code><a href="#UBIQUITOUS:REMFIELD">remfield</a></code> on a <code><a href="http://l1sp.org/cl/list">list</a></code> with one element left that is to be removed. The <code><a href="http://l1sp.org/cl/car">car</a></code> of the cons will simply be set to <code>NIL</code>.</li> <li><code><a href="#UBIQUITOUS:REMFIELD">remfield</a></code> on a <code><a href="http://l1sp.org/cl/vector">vector</a></code>. This would require shifting fields and potentially adjusting it. The desired effect cannot be estimated and so Ubiquitous does not support the operation at all.</li> <li><code><a href="#UBIQUITOUS:REMFIELD">remfield</a></code> on a <code><a href="http://l1sp.org/cl/standard-object">standard-object</a></code>, as class-slots cannot be removed without the MOP and you probably wouldn't want that to happen anyway.</li> <li><code><a href="http://l1sp.org/cl/setf">setf</a></code> <code><a href="#UBIQUITOUS:FIELD">field</a></code> on a <code><a href="http://l1sp.org/cl/list">list</a></code> or <code><a href="http://l1sp.org/cl/vector">vector</a></code> where the field is an index exceeding the length. In this case, an error is signalled as extending the object to the required length might not be a desired or possible effect.</li> <li><code><a href="http://l1sp.org/cl/setf">setf</a></code> <code><a href="#UBIQUITOUS:FIELD">field</a></code> on a <code><a href="http://l1sp.org/cl/list">list</a></code> where the field is a symbol or string. Lists are commonly used as alists or plists. Ubiquitous strictly expects alists.</li> </ul> <p>Another shortcoming is in the department of serialisation. Ubiquitous does not try to be overly smart about things, which especially comes into effect when serialising <code><a href="http://l1sp.org/cl/standard-object">standard-object</a></code>s. Ubiquitous saves the class' slots and restores it by calling <code><a href="http://l1sp.org/cl/allocate-instance">allocate-instance</a></code> without initargs and then <code>setf slot-value</code>-ing one slot after the other. If you need more tailored support for serialising your object, you must extend <code><a href="#UBIQUITOUS:DEFINE-UBIQUITOUS-READER">define-ubiquitous-reader</a></code> and <code><a href="#UBIQUITOUS:DEFINE-UBIQUITOUS-WRITER">define-ubiquitous-writer</a></code>, or write a new storage format altogether. Furthermore, since the default behaviour is to use the lisp printer and reader (with special handling for <code><a href="http://l1sp.org/cl/hash-table">hash-table</a></code>, <code><a href="http://l1sp.org/cl/standard-object">standard-object</a></code>, <code><a href="http://l1sp.org/cl/standard-class">standard-class</a></code>, and <code><a href="http://l1sp.org/cl/package">package</a></code>) to serialise objects, several things might get lost in translation, such as the fill-pointer and adjustability of a vector.</p> </div>  </article> <article id="copyright">  <h2>Copyright</h2> <span>ubiquitous</span> is licensed under the <span><a href="https://tldrlegal.com/search?q=Artistic">Artistic</a></span> license.  © <span>Nicolas Hafner &lt;shinmera@tymoon.eu&gt;</span> .  This library can be obtained on <a href="https://github.com/Shinmera/ubiquitous">https://github.com/Shinmera/ubiquitous</a>.  </article>  <article id="symbol-index"> <h2>Package Index</h2> <ul><li class="package"> <h3> <a name="UBIQUITOUS" href="#UBIQUITOUS">UBIQUITOUS</a> <span class="nicknames">(ORG.SHIRAKUMO.UBIQUITOUS)</span> </h3> <ul><li> <a name="UBIQUITOUS:*CHANGED*"> </a> <article> <header class="special"> <span class="type">special</span>  <h4 class="name"><code><a href="#UBIQUITOUS:*CHANGED*">*CHANGED*</a></code></h4>  </header> <div class="docstring"><pre>When non-NIL it means a change has occurred and the config should be offloaded.</pre></div> </article> </li><li> <a name="UBIQUITOUS:*COMMIT*"> </a> <article> <header class="special"> <span class="type">special</span>  <h4 class="name"><code><a href="#UBIQUITOUS:*COMMIT*">*COMMIT*</a></code></h4>  </header> <div class="docstring"><pre>When non-NIL, an OFFLOAD is performed after a call to (SETF VALUE) or REMVALUE.</pre></div> </article> </li><li> <a name="UBIQUITOUS:*STORAGE*"> </a> <article> <header class="special"> <span class="type">special</span>  <h4 class="name"><code><a href="#UBIQUITOUS:*STORAGE*">*STORAGE*</a></code></h4>  </header> <div class="docstring"><pre>Special variable containing the current root storage object.
+Defaults to an EQUAL hash-table.</pre></div> </article> </li><li> <a name="UBIQUITOUS:*STORAGE-PATHNAME*"> </a> <article> <header class="special"> <span class="type">special</span>  <h4 class="name"><code><a href="#UBIQUITOUS:*STORAGE-PATHNAME*">*STORAGE-PATHNAME*</a></code></h4>  </header> <div class="docstring"><pre>The pathname for the file where the current *STORAGE* is stored.
 Defaults to (DESIGNATOR-PATHNAME :GLOBAL *STORAGE-TYPE*).
 
-See DESIGNATOR-PATHNAME
-See *STORAGE-TYPE*</pre> </article> </li><li> <a name="UBIQUITOUS:*STORAGE-TYPE*"> </a> <article> <header class="special"> <span class="type">special</span>  <h4 class="name"><code><a href="#UBIQUITOUS:*STORAGE-TYPE*">*STORAGE-TYPE*</a></code></h4>  </header> <pre class="docstring">An indicator for the type of storage format to use.
+See <a href="#UBIQUITOUS:DESIGNATOR-PATHNAME">DESIGNATOR-PATHNAME</a>
+See <a href="#UBIQUITOUS:*STORAGE-TYPE*">*STORAGE-TYPE*</a></pre></div> </article> </li><li> <a name="UBIQUITOUS:*STORAGE-TYPE*"> </a> <article> <header class="special"> <span class="type">special</span>  <h4 class="name"><code><a href="#UBIQUITOUS:*STORAGE-TYPE*">*STORAGE-TYPE*</a></code></h4>  </header> <div class="docstring"><pre>An indicator for the type of storage format to use.
 Defaults to :LISP
 
-Only used as a discerning argument to READ/WRITE-STORAGE.</pre> </article> </li><li> <a name="UBIQUITOUS:NO-STORAGE-FILE"> </a> <article> <header class="condition"> <span class="type">condition</span>  <h4 class="name"><code><a href="#UBIQUITOUS:NO-STORAGE-FILE">NO-STORAGE-FILE</a></code></h4>  </header> <pre class="docstring">Warning condition signalled when the storage FILE to be RESTOREd does not exist.
+Only used as a discerning argument to READ/WRITE-STORAGE.</pre></div> </article> </li><li> <a name="UBIQUITOUS:NO-STORAGE-FILE"> </a> <article> <header class="condition"> <span class="type">condition</span>  <h4 class="name"><code><a href="#UBIQUITOUS:NO-STORAGE-FILE">NO-STORAGE-FILE</a></code></h4>  </header> <div class="docstring"><pre>Warning condition signalled when the storage FILE to be RESTOREd does not exist.
 
-See FILE
-See RESTORE</pre> </article> </li><li> <a name="UBIQUITOUS:FIELD"> </a> <article> <header class="accessor"> <span class="type">accessor</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:FIELD">FIELD</a></code></h4> <code class="qualifiers"></code> <code class="arguments">OBJECT FIELD &amp;OPTIONAL DEFAULT</code><code>)</code>  </header> <pre class="docstring">Access FIELD on OBJECT if possible. Returns DEFAULT if FIELD is not present.
+See <a href="#UBIQUITOUS:FILE">FILE</a>
+See <a href="#UBIQUITOUS:RESTORE">RESTORE</a></pre></div> </article> </li><li> <a name="UBIQUITOUS:FIELD"> </a> <article> <header class="accessor"> <span class="type">accessor</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:FIELD">FIELD</a></code></h4> <code class="qualifiers"></code> <code class="arguments">OBJECT FIELD &amp;OPTIONAL DEFAULT</code><code>)</code>  </header> <div class="docstring"><pre>Access FIELD on OBJECT if possible. Returns DEFAULT if FIELD is not present.
 The secondary return value is a boolean depicting whether the field could be found.
 
 This is SETF-able. However, while some objects and field combinations may be used
@@ -101,7 +103,7 @@ In the case where the object is a function, the function is called as follows:
  (setf (field func field) value) =&gt; (funcall func :set field value) 
 
 Note that if there is no matching method to look up the requested field, an error
-is signalled.</pre> </article> </li><li> <a name="UBIQUITOUS:FILE"> </a> <article> <header class="accessor"> <span class="type">accessor</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:FILE">FILE</a></code></h4> <code class="qualifiers"></code> <code class="arguments">CONDITION</code><code>)</code>  </header> <pre class="docstring">To be used on NO-STORAGE-FILE, returns the pathname to the file that could not be found.</pre> </article> </li><li> <a name="UBIQUITOUS:VALUE"> </a> <article> <header class="accessor"> <span class="type">accessor</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:VALUE">VALUE</a></code></h4> <code class="qualifiers"></code> <code class="arguments">&amp;REST PATH</code><code>)</code>  </header> <pre class="docstring">Traverses *STORAGE* by the fields in PATH and returns the value if it can be found.
+is signalled.</pre></div> </article> </li><li> <a name="UBIQUITOUS:FILE"> </a> <article> <header class="accessor"> <span class="type">accessor</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:FILE">FILE</a></code></h4> <code class="qualifiers"></code> <code class="arguments">CONDITION</code><code>)</code>  </header> <div class="docstring"><pre>To be used on NO-STORAGE-FILE, returns the pathname to the file that could not be found.</pre></div> </article> </li><li> <a name="UBIQUITOUS:VALUE"> </a> <article> <header class="accessor"> <span class="type">accessor</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:VALUE">VALUE</a></code></h4> <code class="qualifiers"></code> <code class="arguments">&amp;REST PATH</code><code>)</code>  </header> <div class="docstring"><pre>Traverses *STORAGE* by the fields in PATH and returns the value if it can be found.
 The secondary return value is a boolean depicting whether the field could be found.
 
 This is SETF-able. If a PATH is set that is made up of fields that do not exist yet,
@@ -109,24 +111,24 @@ then these fields are automatically created as necessary (if possible) by usage 
 AUGMENT. Setting with no PATH given sets the value of *STORAGE*. After setting a value,
 OFFLOAD is called, unless *COMMIT* is NIL
 
-See FIELD
-See AUGMENT
-See OFFLOAD
-See *COMMIT*</pre> </article> </li><li> <a name="UBIQUITOUS:CONFIG-DIRECTORY"> </a> <article> <header class="function"> <span class="type">function</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:CONFIG-DIRECTORY">CONFIG-DIRECTORY</a></code></h4> <code class="qualifiers"></code> <code class="arguments"></code><code>)</code>  </header> <pre class="docstring">Returns a hopefully suitable directory for ubiquitous configuration files.
+See <a href="#UBIQUITOUS:FIELD">FIELD</a>
+See <a href="#UBIQUITOUS:AUGMENT">AUGMENT</a>
+See <a href="#UBIQUITOUS:OFFLOAD">OFFLOAD</a>
+See <a href="#UBIQUITOUS:*COMMIT*">*COMMIT*</a></pre></div> </article> </li><li> <a name="UBIQUITOUS:CONFIG-DIRECTORY"> </a> <article> <header class="function"> <span class="type">function</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:CONFIG-DIRECTORY">CONFIG-DIRECTORY</a></code></h4> <code class="qualifiers"></code> <code class="arguments"></code><code>)</code>  </header> <div class="docstring"><pre>Returns a hopefully suitable directory for ubiquitous configuration files.
 
 On Windows this is (USER-HOMEDIR-PATHNAME)/AppData/Local/common-lisp/ubiquitous
-On other systems   (USER-HOMEDIR-PATHNAME)/.config/common-lisp/ubiquitous</pre> </article> </li><li> <a name="UBIQUITOUS:CONFIG-PATHNAME"> </a> <article> <header class="function"> <span class="type">function</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:CONFIG-PATHNAME">CONFIG-PATHNAME</a></code></h4> <code class="qualifiers"></code> <code class="arguments">TYPE</code><code>)</code>  </header> <pre class="docstring">Returns a pathname with the proper directory and type set.
+On other systems   (USER-HOMEDIR-PATHNAME)/.config/common-lisp/ubiquitous</pre></div> </article> </li><li> <a name="UBIQUITOUS:CONFIG-PATHNAME"> </a> <article> <header class="function"> <span class="type">function</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:CONFIG-PATHNAME">CONFIG-PATHNAME</a></code></h4> <code class="qualifiers"></code> <code class="arguments">TYPE</code><code>)</code>  </header> <div class="docstring"><pre>Returns a pathname with the proper directory and type set.
 
-See CONFIG-DIRECTORY</pre> </article> </li><li> <a name="UBIQUITOUS:LAZY-LOADER"> </a> <article> <header class="function"> <span class="type">function</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:LAZY-LOADER">LAZY-LOADER</a></code></h4> <code class="qualifiers"></code> <code class="arguments">ACTION FIELD &amp;OPTIONAL VALUE</code><code>)</code>  </header> <pre class="docstring">A function that is to be used as a direct *STORAGE* value to delay the restoring.
+See <a href="#UBIQUITOUS:CONFIG-DIRECTORY">CONFIG-DIRECTORY</a></pre></div> </article> </li><li> <a name="UBIQUITOUS:LAZY-LOADER"> </a> <article> <header class="function"> <span class="type">function</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:LAZY-LOADER">LAZY-LOADER</a></code></h4> <code class="qualifiers"></code> <code class="arguments">ACTION FIELD &amp;OPTIONAL VALUE</code><code>)</code>  </header> <div class="docstring"><pre>A function that is to be used as a direct *STORAGE* value to delay the restoring.
 
 When called, the function will call RESTORE and then delegate the given
 action to the proper function (FIELD, (SETF FIELD), REMFIELD) using the
 *STORAGE* as object.
 
-See *STORAGE*
-See FIELD
-See REMFIELD
-See WITH-LOCAL-STORAGE</pre> </article> </li><li> <a name="UBIQUITOUS:AUGMENT"> </a> <article> <header class="generic"> <span class="type">generic</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:AUGMENT">AUGMENT</a></code></h4> <code class="qualifiers"></code> <code class="arguments">OBJECT FIELD SECONDARY</code><code>)</code>  </header> <pre class="docstring">Attempts to augment OBJECT on FIELD to be able to host a SECONDARY place.
+See <a href="#UBIQUITOUS:*STORAGE*">*STORAGE*</a>
+See <a href="#UBIQUITOUS:FIELD">FIELD</a>
+See <a href="#UBIQUITOUS:REMFIELD">REMFIELD</a>
+See <a href="#UBIQUITOUS:WITH-LOCAL-STORAGE">WITH-LOCAL-STORAGE</a></pre></div> </article> </li><li> <a name="UBIQUITOUS:AUGMENT"> </a> <article> <header class="generic"> <span class="type">generic</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:AUGMENT">AUGMENT</a></code></h4> <code class="qualifiers"></code> <code class="arguments">OBJECT FIELD SECONDARY</code><code>)</code>  </header> <div class="docstring"><pre>Attempts to augment OBJECT on FIELD to be able to host a SECONDARY place.
 
 This is done by (SETF FIELD) a hash-table on the given OBJECT and FIELD. The
 type of SECONDARY decides the hash-table test to use:
@@ -134,7 +136,7 @@ type of SECONDARY decides the hash-table test to use:
   STRING, BIT-VECTOR, PATHNAME        --- EQUAL
   ARRAY, STRUCTURE-OBJECT, HASH-TABLE --- EQUALP
 
-See FIELD</pre> </article> </li><li> <a name="UBIQUITOUS:CALL-WITH-TRANSACTION"> </a> <article> <header class="generic"> <span class="type">generic</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:CALL-WITH-TRANSACTION">CALL-WITH-TRANSACTION</a></code></h4> <code class="qualifiers"></code> <code class="arguments">FUNCTION &amp;KEY STORAGE TYPE DESIGNATOR</code><code>)</code>  </header> <pre class="docstring">Calls FUNCTION with *COMMIT* set to NIL and offloads if necessary upon exit.
+See <a href="#UBIQUITOUS:FIELD">FIELD</a></pre></div> </article> </li><li> <a name="UBIQUITOUS:CALL-WITH-TRANSACTION"> </a> <article> <header class="generic"> <span class="type">generic</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:CALL-WITH-TRANSACTION">CALL-WITH-TRANSACTION</a></code></h4> <code class="qualifiers"></code> <code class="arguments">FUNCTION &amp;KEY STORAGE TYPE DESIGNATOR</code><code>)</code>  </header> <div class="docstring"><pre>Calls FUNCTION with *COMMIT* set to NIL and offloads if necessary upon exit.
 
 OFFLOAD is only called if *CHANGED* is non-NIL. Otherwise no change is assumed to
 have taken place and the offload is prevented to avoid unnecessary writing.
@@ -142,11 +144,11 @@ have taken place and the offload is prevented to avoid unnecessary writing.
 The keyword parameters replace the bindings for *STORAGE* *STORAGE-TYPE* and
 *STORAGE-PATHNAME* respectively.
 
-See *COMMIT*
-See *CHANGED*
-See OFFLOAD</pre> </article> </li><li> <a name="UBIQUITOUS:DEFAULTED-VALUE"> </a> <article> <header class="generic"> <span class="type">generic</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:DEFAULTED-VALUE">DEFAULTED-VALUE</a></code></h4> <code class="qualifiers"></code> <code class="arguments">DEFAULT &amp;REST PATH</code><code>)</code>  </header> <pre class="docstring">Same as VALUE, but automatically returns and sets DEFAULT if the field cannot be found.
+See <a href="#UBIQUITOUS:*COMMIT*">*COMMIT*</a>
+See <a href="#UBIQUITOUS:*CHANGED*">*CHANGED*</a>
+See <a href="#UBIQUITOUS:OFFLOAD">OFFLOAD</a></pre></div> </article> </li><li> <a name="UBIQUITOUS:DEFAULTED-VALUE"> </a> <article> <header class="generic"> <span class="type">generic</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:DEFAULTED-VALUE">DEFAULTED-VALUE</a></code></h4> <code class="qualifiers"></code> <code class="arguments">DEFAULT &amp;REST PATH</code><code>)</code>  </header> <div class="docstring"><pre>Same as VALUE, but automatically returns and sets DEFAULT if the field cannot be found.
 
-See VALUE</pre> </article> </li><li> <a name="UBIQUITOUS:DESIGNATOR-PATHNAME"> </a> <article> <header class="generic"> <span class="type">generic</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:DESIGNATOR-PATHNAME">DESIGNATOR-PATHNAME</a></code></h4> <code class="qualifiers"></code> <code class="arguments">DESIGNATOR TYPE</code><code>)</code>  </header> <pre class="docstring">Attempts to automatically find the proper pathname for the given DESIGNATOR and TYPE.
+See <a href="#UBIQUITOUS:VALUE">VALUE</a></pre></div> </article> </li><li> <a name="UBIQUITOUS:DESIGNATOR-PATHNAME"> </a> <article> <header class="generic"> <span class="type">generic</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:DESIGNATOR-PATHNAME">DESIGNATOR-PATHNAME</a></code></h4> <code class="qualifiers"></code> <code class="arguments">DESIGNATOR TYPE</code><code>)</code>  </header> <div class="docstring"><pre>Attempts to automatically find the proper pathname for the given DESIGNATOR and TYPE.
 
 If DESIGNATOR is..
   An absolute PATHNAME:
@@ -176,7 +178,7 @@ Examples:
 (designator-pathname :foo :lisp)     --- #p&quot;~/.config/common-lisp/ubiquitous/foo.conf.lisp&quot;
 (designator-pathname #:foo :lisp)    --- #p&quot;~/.config/common-lisp/ubiquitous/foo.conf.lisp&quot;
 (designator-pathname 'cl:find :lisp) --- ERROR
-(designator-pathname 'foo:bar :lisp) --- #p&quot;~/.config/common-lisp/ubiquitous/foo/bar.conf.lisp&quot;</pre> </article> </li><li> <a name="UBIQUITOUS:DESTROY"> </a> <article> <header class="generic"> <span class="type">generic</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:DESTROY">DESTROY</a></code></h4> <code class="qualifiers"></code> <code class="arguments">&amp;OPTIONAL DESIGNATOR TYPE</code><code>)</code>  </header> <pre class="docstring">Destroys *STORAGE* by deleting its file and restoring it to an empty hash table.
+(designator-pathname 'foo:bar :lisp) --- #p&quot;~/.config/common-lisp/ubiquitous/foo/bar.conf.lisp&quot;</pre></div> </article> </li><li> <a name="UBIQUITOUS:DESTROY"> </a> <article> <header class="generic"> <span class="type">generic</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:DESTROY">DESTROY</a></code></h4> <code class="qualifiers"></code> <code class="arguments">&amp;OPTIONAL DESIGNATOR TYPE</code><code>)</code>  </header> <div class="docstring"><pre>Destroys *STORAGE* by deleting its file and restoring it to an empty hash table.
 
 The file used to destroy the storage is calculated by passing
 DESIGNATOR (defaulting to *STORAGE-PATHNAME*) and TYPE (defaulting to
@@ -184,11 +186,11 @@ DESIGNATOR (defaulting to *STORAGE-PATHNAME*) and TYPE (defaulting to
 
 This sets *STORAGE*, *STORAGE-TYPE*, *STORAGE-PATHNAME*, and *CHANGED*.
 
-See *STORAGE*
-See *STORAGE-TYPE*
-See *STORAGE-PATHNAME*
-See *CHANGED*
-See DESIGNATOR-PATHNAME</pre> </article> </li><li> <a name="UBIQUITOUS:OFFLOAD"> </a> <article> <header class="generic"> <span class="type">generic</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:OFFLOAD">OFFLOAD</a></code></h4> <code class="qualifiers"></code> <code class="arguments">&amp;OPTIONAL DESIGNATOR TYPE STORAGE</code><code>)</code>  </header> <pre class="docstring">Offloads *STORAGE* by writing it to file.
+See <a href="#UBIQUITOUS:*STORAGE*">*STORAGE*</a>
+See <a href="#UBIQUITOUS:*STORAGE-TYPE*">*STORAGE-TYPE*</a>
+See <a href="#UBIQUITOUS:*STORAGE-PATHNAME*">*STORAGE-PATHNAME*</a>
+See <a href="#UBIQUITOUS:*CHANGED*">*CHANGED*</a>
+See <a href="#UBIQUITOUS:DESIGNATOR-PATHNAME">DESIGNATOR-PATHNAME</a></pre></div> </article> </li><li> <a name="UBIQUITOUS:OFFLOAD"> </a> <article> <header class="generic"> <span class="type">generic</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:OFFLOAD">OFFLOAD</a></code></h4> <code class="qualifiers"></code> <code class="arguments">&amp;OPTIONAL DESIGNATOR TYPE STORAGE</code><code>)</code>  </header> <div class="docstring"><pre>Offloads *STORAGE* by writing it to file.
 
 The file used to read the storage is calculated by passing
 DESIGNATOR (defaulting to *STORAGE-PATHNAME*) and TYPE (defaulting to
@@ -203,28 +205,28 @@ This sets *STORAGE-TYPE*, *STORAGE-PATHNAME*, and *CHANGED*.
 During OFFLOAD, the following restarts are active:
    ABORT  Aborts and does not set any of the usual variables.
 
-See *STORAGE*
-See *STORAGE-TYPE*
-See *STORAGE-PATHNAME*
-See *CHANGED*
-See DESIGNATOR-PATHNAME
-See WRITE-STORAGE</pre> </article> </li><li> <a name="UBIQUITOUS:READ-STORAGE"> </a> <article> <header class="generic"> <span class="type">generic</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:READ-STORAGE">READ-STORAGE</a></code></h4> <code class="qualifiers"></code> <code class="arguments">TYPE STREAM</code><code>)</code>  </header> <pre class="docstring">Reads a storage object from STREAM, which must be stored in a format suitable for TYPE.
-Returns the read storage object.</pre> </article> </li><li> <a name="UBIQUITOUS:REMFIELD"> </a> <article> <header class="generic"> <span class="type">generic</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:REMFIELD">REMFIELD</a></code></h4> <code class="qualifiers"></code> <code class="arguments">OBJECT FIELD</code><code>)</code>  </header> <pre class="docstring">Removes FIELD from OBJECT if possible.
+See <a href="#UBIQUITOUS:*STORAGE*">*STORAGE*</a>
+See <a href="#UBIQUITOUS:*STORAGE-TYPE*">*STORAGE-TYPE*</a>
+See <a href="#UBIQUITOUS:*STORAGE-PATHNAME*">*STORAGE-PATHNAME*</a>
+See <a href="#UBIQUITOUS:*CHANGED*">*CHANGED*</a>
+See <a href="#UBIQUITOUS:DESIGNATOR-PATHNAME">DESIGNATOR-PATHNAME</a>
+See <a href="#UBIQUITOUS:WRITE-STORAGE">WRITE-STORAGE</a></pre></div> </article> </li><li> <a name="UBIQUITOUS:READ-STORAGE"> </a> <article> <header class="generic"> <span class="type">generic</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:READ-STORAGE">READ-STORAGE</a></code></h4> <code class="qualifiers"></code> <code class="arguments">TYPE STREAM</code><code>)</code>  </header> <div class="docstring"><pre>Reads a storage object from STREAM, which must be stored in a format suitable for TYPE.
+Returns the read storage object.</pre></div> </article> </li><li> <a name="UBIQUITOUS:REMFIELD"> </a> <article> <header class="generic"> <span class="type">generic</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:REMFIELD">REMFIELD</a></code></h4> <code class="qualifiers"></code> <code class="arguments">OBJECT FIELD</code><code>)</code>  </header> <div class="docstring"><pre>Removes FIELD from OBJECT if possible.
 The secondary return value is a boolean depicting whether the field was removed.
 
 In the case where the object is a function, the function is called as follows:
   (remfield func field)          =&gt; (funcall func :remove field)
 
 Note that if there is no matching method to look up the requested field, an error
-is signalled.</pre> </article> </li><li> <a name="UBIQUITOUS:REMVALUE"> </a> <article> <header class="generic"> <span class="type">generic</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:REMVALUE">REMVALUE</a></code></h4> <code class="qualifiers"></code> <code class="arguments">&amp;REST PATH</code><code>)</code>  </header> <pre class="docstring">Removes the value denoted by the PATH.
+is signalled.</pre></div> </article> </li><li> <a name="UBIQUITOUS:REMVALUE"> </a> <article> <header class="generic"> <span class="type">generic</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:REMVALUE">REMVALUE</a></code></h4> <code class="qualifiers"></code> <code class="arguments">&amp;REST PATH</code><code>)</code>  </header> <div class="docstring"><pre>Removes the value denoted by the PATH.
 The secondary return value is a boolean depicting whether the field could be found.
 
 First traverses *STORAGE* until the last field in PATH by FIELD, then uses REMFIELD
 on the last remaining field. If no PATH is given, the *STORAGE* is reset to an empty
 hash-table.
 
-See FIELD
-See REMFIELD</pre> </article> </li><li> <a name="UBIQUITOUS:RESTORE"> </a> <article> <header class="generic"> <span class="type">generic</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:RESTORE">RESTORE</a></code></h4> <code class="qualifiers"></code> <code class="arguments">&amp;OPTIONAL DESIGNATOR TYPE</code><code>)</code>  </header> <pre class="docstring">Restores *STORAGE* by reading it from file if possible and returns it.
+See <a href="#UBIQUITOUS:FIELD">FIELD</a>
+See <a href="#UBIQUITOUS:REMFIELD">REMFIELD</a></pre></div> </article> </li><li> <a name="UBIQUITOUS:RESTORE"> </a> <article> <header class="generic"> <span class="type">generic</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:RESTORE">RESTORE</a></code></h4> <code class="qualifiers"></code> <code class="arguments">&amp;OPTIONAL DESIGNATOR TYPE</code><code>)</code>  </header> <div class="docstring"><pre>Restores *STORAGE* by reading it from file if possible and returns it.
 
 The file used to read the storage is calculated by passing
 DESIGNATOR (defaulting to *STORAGE-PATHNAME*) and TYPE (defaulting to
@@ -240,14 +242,16 @@ During OFFLOAD, the following restarts are active:
   USE-NEW-STORAGE  Takes one argument to use as the new storage instead.
   ABORT            Aborts and does not set any of the usual variables.
 
-See *STORAGE*
-See *STORAGE-TYPE*
-See *STORAGE-PATHNAME*
-See *CHANGED*
-See NO-STORAGE-FILE
-See DESIGNATOR-PATHNAME
-See READ-STORAGE</pre> </article> </li><li> <a name="UBIQUITOUS:WRITE-STORAGE"> </a> <article> <header class="generic"> <span class="type">generic</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:WRITE-STORAGE">WRITE-STORAGE</a></code></h4> <code class="qualifiers"></code> <code class="arguments">TYPE STREAM STORAGE</code><code>)</code>  </header> <pre class="docstring">Writes the STORAGE object to STREAM in a format suitable for TYPE.
-Returns the written STORAGE object.</pre> </article> </li><li> <a name="UBIQUITOUS:DEFINE-UBIQUITOUS-READER"> </a> <article> <header class="macro"> <span class="type">macro</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:DEFINE-UBIQUITOUS-READER">DEFINE-UBIQUITOUS-READER</a></code></h4> <code class="qualifiers"></code> <code class="arguments">&amp;REST ARGS</code><code>)</code>  </header> <pre class="docstring">Define a new function that produces an object of TYPE by parsing the read FORM.</pre> </article> </li><li> <a name="UBIQUITOUS:DEFINE-UBIQUITOUS-WRITER"> </a> <article> <header class="macro"> <span class="type">macro</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:DEFINE-UBIQUITOUS-WRITER">DEFINE-UBIQUITOUS-WRITER</a></code></h4> <code class="qualifiers"></code> <code class="arguments">&amp;REST ARGS</code><code>)</code>  </header> <pre class="docstring">Define a new function that produces a list of objects to be written to reproduce OBJECT of TYPE.</pre> </article> </li><li> <a name="UBIQUITOUS:WITH-LOCAL-STORAGE"> </a> <article> <header class="macro"> <span class="type">macro</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:WITH-LOCAL-STORAGE">WITH-LOCAL-STORAGE</a></code></h4> <code class="qualifiers"></code> <code class="arguments">&amp;REST ARGS</code><code>)</code>  </header> <pre class="docstring">Useful for completely encapsulating the storage in a local block.
+See <a href="#UBIQUITOUS:*STORAGE*">*STORAGE*</a>
+See <a href="#UBIQUITOUS:*STORAGE-TYPE*">*STORAGE-TYPE*</a>
+See <a href="#UBIQUITOUS:*STORAGE-PATHNAME*">*STORAGE-PATHNAME*</a>
+See <a href="#UBIQUITOUS:*CHANGED*">*CHANGED*</a>
+See <a href="#UBIQUITOUS:NO-STORAGE-FILE">NO-STORAGE-FILE</a>
+See <a href="#UBIQUITOUS:DESIGNATOR-PATHNAME">DESIGNATOR-PATHNAME</a>
+See <a href="#UBIQUITOUS:READ-STORAGE">READ-STORAGE</a></pre></div> </article> </li><li> <a name="UBIQUITOUS:WRITE-STORAGE"> </a> <article> <header class="generic"> <span class="type">generic</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:WRITE-STORAGE">WRITE-STORAGE</a></code></h4> <code class="qualifiers"></code> <code class="arguments">TYPE STREAM STORAGE</code><code>)</code>  </header> <div class="docstring"><pre>Writes the STORAGE object to STREAM in a format suitable for TYPE.
+Returns the written STORAGE object.</pre></div> </article> </li><li> <a name="UBIQUITOUS:DEFINE-UBIQUITOUS-READER"> </a> <article> <header class="macro"> <span class="type">macro</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:DEFINE-UBIQUITOUS-READER">DEFINE-UBIQUITOUS-READER</a></code></h4> <code class="qualifiers"></code> <code class="arguments">TYPE (FORM) &amp;BODY BODY</code><code>)</code>  </header> <div class="docstring"><pre>Define a new function that produces an object of TYPE by parsing the read FORM.</pre></div> </article> </li><li> <a name="UBIQUITOUS:DEFINE-UBIQUITOUS-WRITER"> </a> <article> <header class="macro"> <span class="type">macro</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:DEFINE-UBIQUITOUS-WRITER">DEFINE-UBIQUITOUS-WRITER</a></code></h4> <code class="qualifiers"></code> <code class="arguments">TYPE (OBJECT &amp;OPTIONAL (PRIORITY 2000)) &amp;BODY BODY</code><code>)</code>  </header> <div class="docstring"><pre>Define a new function that produces a list of objects to be written to reproduce OBJECT of TYPE.</pre></div> </article> </li><li> <a name="UBIQUITOUS:WITH-LOCAL-STORAGE"> </a> <article> <header class="macro"> <span class="type">macro</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:WITH-LOCAL-STORAGE">WITH-LOCAL-STORAGE</a></code></h4> <code class="qualifiers"></code> <code class="arguments">(DESIGNATOR &amp;KEY (TYPE '*STORAGE-TYPE*) (STORAGE '(FUNCTION LAZY-LOADER))
+ (TRANSACTION T))
+ &amp;BODY BODY</code><code>)</code>  </header> <div class="docstring"><pre>Useful for completely encapsulating the storage in a local block.
 
 Unlike WITH-STORAGE, this also binds the *STORAGE-TYPE* and
 *STORAGE-PATHNAME*. If TRANSACTION is non-NIL, WITH-TRANSACTION is
@@ -256,10 +260,10 @@ function, meaning that if the storage is never accessed, it is never
 loaded to begin with. This, along with WITH-TRANSACTION can be a
 good optimisation to avoid unnecessary disk access.
 
-See *STORAGE*
-See *STORAGE-TYPE*
-See *STORAGE-PATHNAME*
-See WITH-TRANSACTION
-See LAZY-LOADER</pre> </article> </li><li> <a name="UBIQUITOUS:WITH-STORAGE"> </a> <article> <header class="macro"> <span class="type">macro</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:WITH-STORAGE">WITH-STORAGE</a></code></h4> <code class="qualifiers"></code> <code class="arguments">&amp;REST ARGS</code><code>)</code>  </header> <pre class="docstring">Binds *STORAGE* to the given STORAGE object, ensuring a local configuration.</pre> </article> </li><li> <a name="UBIQUITOUS:WITH-TRANSACTION"> </a> <article> <header class="macro"> <span class="type">macro</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:WITH-TRANSACTION">WITH-TRANSACTION</a></code></h4> <code class="qualifiers"></code> <code class="arguments">&amp;REST ARGS</code><code>)</code>  </header> <pre class="docstring">Executes BODY within a transaction.
+See <a href="#UBIQUITOUS:*STORAGE*">*STORAGE*</a>
+See <a href="#UBIQUITOUS:*STORAGE-TYPE*">*STORAGE-TYPE*</a>
+See <a href="#UBIQUITOUS:*STORAGE-PATHNAME*">*STORAGE-PATHNAME*</a>
+See <a href="#UBIQUITOUS:WITH-TRANSACTION">WITH-TRANSACTION</a>
+See <a href="#UBIQUITOUS:LAZY-LOADER">LAZY-LOADER</a></pre></div> </article> </li><li> <a name="UBIQUITOUS:WITH-STORAGE"> </a> <article> <header class="macro"> <span class="type">macro</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:WITH-STORAGE">WITH-STORAGE</a></code></h4> <code class="qualifiers"></code> <code class="arguments">(STORAGE) &amp;BODY BODY</code><code>)</code>  </header> <div class="docstring"><pre>Binds *STORAGE* to the given STORAGE object, ensuring a local configuration.</pre></div> </article> </li><li> <a name="UBIQUITOUS:WITH-TRANSACTION"> </a> <article> <header class="macro"> <span class="type">macro</span>  <code>(</code><h4 class="name"><code><a href="#UBIQUITOUS:WITH-TRANSACTION">WITH-TRANSACTION</a></code></h4> <code class="qualifiers"></code> <code class="arguments">(&amp;KEY STORAGE TYPE DESIGNATOR) &amp;BODY BODY</code><code>)</code>  </header> <div class="docstring"><pre>Executes BODY within a transaction.
 
-See CALL-WITH-TRANSACTION</pre> </article> </li></ul> </li></ul> </article>  </main> </body> </html> 
+See <a href="#UBIQUITOUS:CALL-WITH-TRANSACTION">CALL-WITH-TRANSACTION</a></pre></div> </article> </li></ul> </li></ul> </article>  </main> </body> </html> 
