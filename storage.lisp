@@ -71,7 +71,7 @@
                                   :defaults pathname)))
         (with-open-file (stream temp :direction :output :if-exists :supersede :if-does-not-exist :create)
           (write-storage *storage-type* stream storage))
-        #+(or windows mswindows win32 cormanlisp)
+        #+(or windows mswindows win32 cormanlisp ccl)
         (when (probe-file pathname) (delete-file pathname))
         (rename-file temp pathname)
         (setf *storage-pathname* pathname)
