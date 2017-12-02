@@ -63,8 +63,9 @@
 (defgeneric defaulted-value (default &rest path)
   (:method (default &rest path)
     (multiple-value-bind (value found) (apply #'value path)
-      (values (if found value (apply #'(setf value) default path))
-              t))))
+      (if found
+          (values value t)
+          (values (apply #'(setf value) default path)) nil))))
 
 (defgeneric call-with-transaction (function &key storage type designator)
   (:method (function &key storage type designator)
