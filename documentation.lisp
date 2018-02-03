@@ -214,7 +214,11 @@ See WITH-TRANSACTION
 See LAZY-LOADER")
   
   ((no-storage-file type)
-   "Warning condition signalled when the storage FILE to be RESTOREd does not exist.
+   "Condition signalled when the storage FILE to be RESTOREd does not exist.
+
+This does not usually denote a problem, but can be useful to know about
+if you want perform certain actions on what is probably a first-time
+launch.
 
 See FILE
 See RESTORE")

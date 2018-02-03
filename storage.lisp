@@ -39,10 +39,10 @@
               (*storage-pathname* ,designator))
          ,@body)))
 
-(define-condition no-storage-file (warning)
+(define-condition no-storage-file ()
   ((file :initarg :file :accessor file))
   (:default-initargs :file (error "FILE required."))
-  (:report (lambda (c s) (format s "Requested storage file ~s does not exist." (file c)))))
+  (:report (lambda (c s) (format s "Requested storage file ~s does not exist." (namestring (file c))))))
 
 (defgeneric restore (&optional designator type)
   (:method (&optional (designator *storage-pathname*) (type *storage-type*))
@@ -52,7 +52,7 @@
           (setf *storage* (if stream
                               (read-storage type stream)
                               (restart-case
-                                  (progn (warn 'no-storage-file :file pathname)
+                                  (progn (signal 'no-storage-file :file pathname)
                                          (make-hash-table :test 'equal))
                                 (use-new-storage (value)
                                   :report "Use a new object for storage"
