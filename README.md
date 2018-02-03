@@ -12,7 +12,7 @@ The main functions you will be using are `restore`, and `value`. The former load
     (setf (value :test) "hi!")
     (value :test)
 
-When values are set, it automatically saves the configuration to file. The location of the file is stored in `*storage-pathname*`, which is automatically computed according to what is most suitable for the given parameter and OS. On Windows it will be under `%HOME%\AppData\Local\common-lisp\ubiquitous\` and everywhere else under `~/.config/common-lisp/ubiquitous/`. The exact behaviour of the pathname choosing is documented in `designator-pathname`.
+Ubiquitous will not perform any loading unless you tell it to. Thus, before the storage is truly persistent, you need to tell it where to `restore` from. Then, when values are set, it automatically saves the configuration to file. The location of the file is stored in `*storage-pathname*`, which is automatically computed according to what is most suitable for the given `restore` designator and OS. On Windows it will be under `%HOME%\AppData\Local\common-lisp\ubiquitous\` and everywhere else under `~/.config/common-lisp/ubiquitous/`. The exact behaviour of the pathname choosing is documented in `designator-pathname`.
 
 `value` doesn't take a single name, but rather a path to a configuration value. The way things are traversed is handled by the `field` generic accessor. It tries to handle a number of commonly used structures, but you might have to extend it for your own classes, if you want to store those directly and traverse them. If a place does not exist yet, Ubiquitous will try to augment it if possible by creating a hash-table. This allows you to directly write a long path without having to worry about the containers existing.
 
