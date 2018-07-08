@@ -1,0 +1,249 @@
+<!DOCTYPE html> <html lang="en"> <head> <meta charset="utf-8"> <title>Ubiquitous</title> <style>html body{margin:0 auto 0 auto;padding:20px;max-width:1024px;font-family:sans-serif;font-size:14pt;overflow-y:scroll;}html body a{text-decoration:none;}html body a[href]{color:#0055AA;}html body a[href]:hover{color:#0088EE;}html body pre{background:#FAFAFA;border:1px solid #DDDDDD;padding:0.75em;overflow-x:auto;}html body pre >code a[href]{color:#223388;}article.system h1,article.system h2,article.system h3,article.system h4,article.system h5,article.system h6{margin:0.2em 0 0.1em 0;text-indent:1em;}article.system >header{text-align:center;}article.system >header img.logo{display:block;margin:auto;max-height:170px;}article.system >header h1{display:inline-block;text-indent:0;font-size:2.5em;}article.system >header .version{vertical-align:bottom;}article.system >header .languages{margin-top:-0.5em;text-transform:capitalize;}article.system >header .description{margin:0;}article.system >header .pages{margin-top:0.5em;font-size:1.2em;text-transform:capitalize;}article.system >header .pages a{display:inline-block;padding:0 0.2em;}article.system >section{margin:1em 0 1em 0;}article.system #index >ul{list-style:none;margin:0;padding:0;}article.system .row label{display:inline-block;min-width:6em;}article.system #system .row{display:flex;}article.system #system #dependencies{display:inline;margin:0;padding:0;}article.system #system #dependencies li{display:inline;padding:0 0.2em;}article.definition{margin:1em 0 0 0;}article.definition >header h1,article.definition >header h2,article.definition >header h3,article.definition >header h4,article.definition >header h5,article.definition >header h6{text-indent:0;display:inline-block;}article.definition >header ul{display:inline-block;list-style:none;margin:0;padding:0;}article.definition >header ul li{display:inline-block;padding:0 0.2em 0 0;}article.definition >header .visibility{display:none;}article.definition >header .visibility,article.definition >header .type{text-transform:lowercase;}article.definition >header .source-link{visibility:hidden;float:right;}article.definition >header .source-link:after{visibility:visible;content:"[SRC]";}article.definition .docstring{margin:0 0 0 1em;}article.definition .docstring pre{font-size:0.8em;white-space:pre-wrap;}.definition.package >header ul.nicknames{display:inline-block;list-style:none;margin:0;padding:0 0 0 1em;}.definition.package >header ul.nicknames li{display:inline;}.definition.package >header ul.nicknames:before{content:"(";}.definition.package >header ul.nicknames:after{content:")";}.definition.package ul.definitions{margin:0;list-style:none;padding:0 0 0 0.5em;}.definition.callable >header .name:before,.definition.type >header .name:before{content:"(";font-weight:normal;}.definition.callable >header .arguments:after,.definition.type >header .arguments:after{content:")";}.definition li>mark{background:none;border-left:0.3em solid #0088EE;padding-left:0.3em;display:block;}</style> </head> <body> <article class="system"> <header>  <img class="logo" src="ubiquitous-logo.png" alt="Logo">  <h1>ubiquitous</h1> <span class="version">1.2.3</span> <nav class="languages">      <a href="index.html">English</a>  </nav> <p class="description">A library providing a universal application configuration mechanism.</p> <nav class="pages">      <a href="index.html">ubiquitous</a>  </nav> </header> <section id="documentation"><h2>About Ubiquitous</h2> <p>Ubiquitous is a very easy-to-use library for persistent configuration storage. It automatically takes care of finding a suitable place to save your data, and provides simple functions to access and modify the data within.</p> <h2>How To</h2> <p>Load ubiquitous through ASDF or Quicklisp.</p> <pre><code>(ql:quickload :ubiquitous)
+</code></pre> <p>The main functions you will be using are <code><a href="#GENERIC-FUNCTION%20UBIQUITOUS%3ARESTORE" class="xref">restore</a></code>, and <code><a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AVALUE" class="xref">value</a></code>. The former loads the configuration according to a designator, and the latter is an accessor allowing you to retrieve and set properties.</p> <pre><code>(<a href="#GENERIC-FUNCTION%20UBIQUITOUS%3ARESTORE" class="xref">restore</a> 'my-config)
+(setf (<a href="#GENERIC-FUNCTION%20UBIQUITOUS%3A%28SETF%20VALUE%29" class="xref">value</a> :test) &quot;hi!&quot;)
+(<a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AVALUE" class="xref">value</a> :test)
+</code></pre> <p>Ubiquitous will not perform any loading unless you tell it to. Thus, before the storage is truly persistent, you need to tell it where to <code><a href="#GENERIC-FUNCTION%20UBIQUITOUS%3ARESTORE" class="xref">restore</a></code> from. Then, when values are set, it automatically saves the configuration to file. The location of the file is stored in <code><a href="#VARIABLE%20UBIQUITOUS%3A%2ASTORAGE-PATHNAME%2A" class="xref">*storage-pathname*</a></code>, which is automatically computed according to what is most suitable for the given <code><a href="#GENERIC-FUNCTION%20UBIQUITOUS%3ARESTORE" class="xref">restore</a></code> designator and OS. On Windows it will be under <code>%HOME%\AppData\Local\common-lisp\ubiquitous\</code> and everywhere else under <code>~/.config/common-lisp/ubiquitous/</code>. The exact behaviour of the pathname choosing is documented in <code><a href="#GENERIC-FUNCTION%20UBIQUITOUS%3ADESIGNATOR-PATHNAME" class="xref">designator-pathname</a></code>.</p> <p><code><a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AVALUE" class="xref">value</a></code> doesn't take a single name, but rather a path to a configuration value. The way things are traversed is handled by the <code><a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AFIELD" class="xref">field</a></code> generic accessor. It tries to handle a number of commonly used structures, but you might have to extend it for your own classes, if you want to store those directly and traverse them. If a place does not exist yet, Ubiquitous will try to augment it if possible by creating a hash-table. This allows you to directly write a long path without having to worry about the containers existing.</p> <pre><code>(setf (<a href="#GENERIC-FUNCTION%20UBIQUITOUS%3A%28SETF%20VALUE%29" class="xref">value</a> 'something 'that 'goes 6 'levels 'deep) &quot;Calling from the depths!&quot;)
+</code></pre> <p>Often times for configuration one might want to specify a default value to use.</p> <pre><code>(<a href="#GENERIC-FUNCTION%20UBIQUITOUS%3ADEFAULTED-VALUE" class="xref">defaulted-value</a> &quot;localhost&quot; :hostname)
+</code></pre> <p>In case you need to remove a value, there's <code><a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AREMVALUE" class="xref">remvalue</a></code>.</p> <pre><code>(<a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AREMVALUE" class="xref">remvalue</a> 'something 'that 'goes 6 'levels 'deep)
+</code></pre> <p>By default, an extended s-expression format is used to store things in a file. If you need a different format, you can add methods to <code><a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AREAD-STORAGE" class="xref">read-storage</a></code> and <code><a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AWRITE-STORAGE" class="xref">write-storage</a></code>, and set <code><a href="#VARIABLE%20UBIQUITOUS%3A%2ASTORAGE-TYPE%2A" class="xref">*storage-type*</a></code> to your type name. Since <code>(setf value)</code> automatically calls <code><a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AOFFLOAD" class="xref">offload</a></code> to persist the storage, this might lead to a lot of saving all over the place. In order to avoid this, you can bundle a block of operations in a <code><a href="#MACRO-FUNCTION%20UBIQUITOUS%3AWITH-TRANSACTION" class="xref">with-transaction</a></code> form, which will only perform an <code><a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AOFFLOAD" class="xref">offload</a></code> once the block exits.</p> <p>Ubiquitous in itself does not have any external dependencies, so you may also bundle it into a singular file to just <code><a href="#FUNCTION%20UBIQUITOUS%3ALOAD" class="xref">load</a></code> using ASDF:</p> <pre><code>(asdf:operate :build-op :ubiquitous)
+</code></pre> <p>Which will produce an independent <code>ubiquitous.lisp</code> file in <code>(asdf:system-source-directory :ubiquitous)</code>.</p> <h2>Concurrency</h2> <p>By default Ubiquitous does not try to handle concurrent access in any way. The reason for this is not laziness, but merely the desire to avoid dependencies for those that don't need it. However, if you require safe concurrent access and handling of the storage, simply load <code>ubiquitous-concurrent</code> instead of <code>ubiquitous</code>. This will also pull in <code>bordeaux-threads</code> and establish additional methods around the standard definitions that will ensure concurrency safety.</p> <p>This will still work irregardless of how many different storage objects you use, as the locking on the operations happens on the currently accessed storage object itself, rather than on a global lock. In order to avoid needless locking and unlocking, you should bundle your operations into a <code><a href="#MACRO-FUNCTION%20UBIQUITOUS%3AWITH-TRANSACTION" class="xref">with-transaction</a></code> block, which will only perform a lock once.</p> <h2>Shortcomings</h2> <p>A couple of shortcomings exist in Ubiquitous, almost by necessity. As you might know out of experience, certain modifying operations are not possible to do without being able to modify the container of the object itself. As an example, <code><a href="#MACRO-FUNCTION%20UBIQUITOUS%3APOP" class="xref">pop</a></code>ing an element off the head of the list requires setting the variable that contains the list, rather than the list itself. This sort of thing is rather annoying to model in a generic manner without complicating the common case needlessly. Furthermore, in a couple of instances ambiguity arises due to multiple actions being possible.</p> <p>In detail, the following operations are supported suboptimally, or not at all:</p> <ul> <li><code><a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AREMFIELD" class="xref">remfield</a></code> on a <code><a href="#FUNCTION%20UBIQUITOUS%3ALIST" class="xref">list</a></code> with one element left that is to be removed. The <code><a href="#FUNCTION%20UBIQUITOUS%3ACAR" class="xref">car</a></code> of the cons will simply be set to <code>NIL</code>.</li> <li><code><a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AREMFIELD" class="xref">remfield</a></code> on a <code><a href="#FUNCTION%20UBIQUITOUS%3AVECTOR" class="xref">vector</a></code>. This would require shifting fields and potentially adjusting it. The desired effect cannot be estimated and so Ubiquitous does not support the operation at all.</li> <li><code><a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AREMFIELD" class="xref">remfield</a></code> on a <code><a href="#CLASS%20UBIQUITOUS%3ASTANDARD-OBJECT" class="xref">standard-object</a></code>, as class-slots cannot be removed without the MOP and you probably wouldn't want that to happen anyway.</li> <li><code><a href="#MACRO-FUNCTION%20UBIQUITOUS%3ASETF" class="xref">setf</a></code> <code><a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AFIELD" class="xref">field</a></code> on a <code><a href="#FUNCTION%20UBIQUITOUS%3ALIST" class="xref">list</a></code> or <code><a href="#FUNCTION%20UBIQUITOUS%3AVECTOR" class="xref">vector</a></code> where the field is an index exceeding the length. In this case, an error is signalled as extending the object to the required length might not be a desired or possible effect.</li> <li><code><a href="#MACRO-FUNCTION%20UBIQUITOUS%3ASETF" class="xref">setf</a></code> <code><a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AFIELD" class="xref">field</a></code> on a <code><a href="#FUNCTION%20UBIQUITOUS%3ALIST" class="xref">list</a></code> where the field is a symbol or string. Lists are commonly used as alists or plists. Ubiquitous strictly expects alists.</li> </ul> <p>Another shortcoming is in the department of serialisation. Ubiquitous does not try to be overly smart about things, which especially comes into effect when serialising <code><a href="#CLASS%20UBIQUITOUS%3ASTANDARD-OBJECT" class="xref">standard-object</a></code>s. Ubiquitous saves the class' slots and restores it by calling <code><a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AALLOCATE-INSTANCE" class="xref">allocate-instance</a></code> without initargs and then <code>setf slot-value</code>-ing one slot after the other. If you need more tailored support for serialising your object, you must extend <code><a href="#MACRO-FUNCTION%20UBIQUITOUS%3ADEFINE-UBIQUITOUS-READER" class="xref">define-ubiquitous-reader</a></code> and <code><a href="#MACRO-FUNCTION%20UBIQUITOUS%3ADEFINE-UBIQUITOUS-WRITER" class="xref">define-ubiquitous-writer</a></code>, or write a new storage format altogether. Furthermore, since the default behaviour is to use the lisp printer and reader (with special handling for <code><a href="#CLASS%20UBIQUITOUS%3AHASH-TABLE" class="xref">hash-table</a></code>, <code><a href="#CLASS%20UBIQUITOUS%3ASTANDARD-OBJECT" class="xref">standard-object</a></code>, <code><a href="#CLASS%20UBIQUITOUS%3ASTANDARD-CLASS" class="xref">standard-class</a></code>, and <code><a href="#CLASS%20UBIQUITOUS%3APACKAGE" class="xref">package</a></code>) to serialise objects, several things might get lost in translation, such as the fill-pointer and adjustability of a vector.</p> </section>  <section id="system"> <h2>System Information</h2>  <div class="row"> <label for="version">Version:</label> <a id="version">1.2.3</a> </div>    <div class="row"> <label for="author">Author:</label> <a id="author" href="mailto:shinmera@tymoon.eu">Nicolas Hafner</a> </div>   <div class="row"> <label for="license">License:</label> <a id="license" href="https://github.com/Shinmera/ubiquitous/blob/master/LICENSE">Artistic</a> </div>   <div class="row"> <label for="homepage">Homepage:</label> <a id="homepage" href="https://github.com/Shinmera/ubiquitous">https://github.com/Shinmera/ubiquitous</a> </div>  </section>  <section id="index"> <h2>Definition Index</h2> <ul> <li> <article class="definition package" id="PACKAGE UBIQUITOUS"> <header> <h3> <a href="#PACKAGE%20UBIQUITOUS">UBIQUITOUS</a> </h3> <ul class="nicknames"> <li>ORG.SHIRAKUMO.UBIQUITOUS</li> </ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/package.lisp#L8">Source</a>  </header> <div class="docstring"><i>No documentation provided.</i></div> <ul class="definitions"> <li> <article class="definition special-variable NIL" id="VARIABLE UBIQUITOUS:*CHANGED*"> <header> <span class="visibility">EXTERNAL</span> <span class="type">SPECIAL-VARIABLE</span> <h4 class="name"> <a href="#VARIABLE%20UBIQUITOUS%3A%2ACHANGED%2A">*CHANGED*</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"></ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/config.lisp#L10">Source</a>  </header> <div class="docstring"><pre>When non-NIL it means a change has occurred and the config should be offloaded.</pre></div> </article> </li>  <li> <article class="definition special-variable NIL" id="VARIABLE UBIQUITOUS:*COMMIT*"> <header> <span class="visibility">EXTERNAL</span> <span class="type">SPECIAL-VARIABLE</span> <h4 class="name"> <a href="#VARIABLE%20UBIQUITOUS%3A%2ACOMMIT%2A">*COMMIT*</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"></ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/config.lisp#L9">Source</a>  </header> <div class="docstring"><pre>When non-NIL, an OFFLOAD is performed after a call to (SETF VALUE) or REMVALUE.</pre></div> </article> </li>  <li> <article class="definition special-variable NIL" id="VARIABLE UBIQUITOUS:*STORAGE*"> <header> <span class="visibility">EXTERNAL</span> <span class="type">SPECIAL-VARIABLE</span> <h4 class="name"> <a href="#VARIABLE%20UBIQUITOUS%3A%2ASTORAGE%2A">*STORAGE*</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"></ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/storage.lisp#L9">Source</a>  </header> <div class="docstring"><pre>Special variable containing the current root storage object.
+Defaults to an EQUAL hash-table.</pre></div> </article> </li>  <li> <article class="definition special-variable NIL" id="VARIABLE UBIQUITOUS:*STORAGE-PATHNAME*"> <header> <span class="visibility">EXTERNAL</span> <span class="type">SPECIAL-VARIABLE</span> <h4 class="name"> <a href="#VARIABLE%20UBIQUITOUS%3A%2ASTORAGE-PATHNAME%2A">*STORAGE-PATHNAME*</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"></ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/storage.lisp#L11">Source</a>  </header> <div class="docstring"><pre>The pathname for the file where the current *STORAGE* is stored.
+Defaults to (DESIGNATOR-PATHNAME :GLOBAL *STORAGE-TYPE*).
+
+See <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3ADESIGNATOR-PATHNAME" class="xref">DESIGNATOR-PATHNAME</a>
+See <a href="#VARIABLE%20UBIQUITOUS%3A%2ASTORAGE-TYPE%2A" class="xref">*STORAGE-TYPE*</a></pre></div> </article> </li>  <li> <article class="definition special-variable NIL" id="VARIABLE UBIQUITOUS:*STORAGE-TYPE*"> <header> <span class="visibility">EXTERNAL</span> <span class="type">SPECIAL-VARIABLE</span> <h4 class="name"> <a href="#VARIABLE%20UBIQUITOUS%3A%2ASTORAGE-TYPE%2A">*STORAGE-TYPE*</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"></ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/storage.lisp#L10">Source</a>  </header> <div class="docstring"><pre>An indicator for the type of storage format to use.
+Defaults to :LISP
+
+Only used as a discerning argument to READ/WRITE-STORAGE.</pre></div> </article> </li>  <li> <article class="definition condition NIL" id="CONDITION UBIQUITOUS:NO-STORAGE-FILE"> <header> <span class="visibility">EXTERNAL</span> <span class="type">CONDITION</span> <h4 class="name"> <a href="#CONDITION%20UBIQUITOUS%3ANO-STORAGE-FILE">NO-STORAGE-FILE</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"></ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/storage.lisp#L42">Source</a>  </header> <div class="docstring"><pre>Condition signalled when the storage FILE to be RESTOREd does not exist.
+
+This does not usually denote a problem, but can be useful to know about
+if you want perform certain actions on what is probably a first-time
+launch.
+
+See <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AFILE" class="xref">FILE</a>
+See <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3ARESTORE" class="xref">RESTORE</a></pre></div> </article> </li>  <li> <article class="definition function callable" id="FUNCTION UBIQUITOUS:CONFIG-DIRECTORY"> <header> <span class="visibility">EXTERNAL</span> <span class="type">FUNCTION</span> <h4 class="name"> <a href="#FUNCTION%20UBIQUITOUS%3ACONFIG-DIRECTORY">CONFIG-DIRECTORY</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"></ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/pathname.lisp#L9">Source</a>  </header> <div class="docstring"><pre>Returns a hopefully suitable directory for ubiquitous configuration files.
+
+On Windows this is (USER-HOMEDIR-PATHNAME)/AppData/Local/common-lisp/ubiquitous
+On other systems   (USER-HOMEDIR-PATHNAME)/.config/common-lisp/ubiquitous</pre></div> </article> </li>  <li> <article class="definition function callable" id="FUNCTION UBIQUITOUS:CONFIG-PATHNAME"> <header> <span class="visibility">EXTERNAL</span> <span class="type">FUNCTION</span> <h4 class="name"> <a href="#FUNCTION%20UBIQUITOUS%3ACONFIG-PATHNAME">CONFIG-PATHNAME</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"> <li class="argument">TYPE</li> </ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/pathname.lisp#L17">Source</a>  </header> <div class="docstring"><pre>Returns a pathname with the proper directory and type set.
+
+See <a href="#FUNCTION%20UBIQUITOUS%3ACONFIG-DIRECTORY" class="xref">CONFIG-DIRECTORY</a></pre></div> </article> </li>  <li> <article class="definition function callable" id="FUNCTION UBIQUITOUS:LAZY-LOADER"> <header> <span class="visibility">EXTERNAL</span> <span class="type">FUNCTION</span> <h4 class="name"> <a href="#FUNCTION%20UBIQUITOUS%3ALAZY-LOADER">LAZY-LOADER</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"> <li class="argument">ACTION</li>  <li class="argument">FIELD</li>  <li class="argument">&amp;OPTIONAL</li>  <li class="argument">VALUE</li> </ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/storage.lisp#L24">Source</a>  </header> <div class="docstring"><pre>A function that is to be used as a direct *STORAGE* value to delay the restoring.
+
+When called, the function will call RESTORE and then delegate the given
+action to the proper function (FIELD, (SETF FIELD), REMFIELD) using the
+*STORAGE* as object.
+
+See <a href="#VARIABLE%20UBIQUITOUS%3A%2ASTORAGE%2A" class="xref">*STORAGE*</a>
+See <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AFIELD" class="xref">FIELD</a>
+See <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AREMFIELD" class="xref">REMFIELD</a>
+See <a href="#MACRO-FUNCTION%20UBIQUITOUS%3AWITH-LOCAL-STORAGE" class="xref">WITH-LOCAL-STORAGE</a></pre></div> </article> </li>  <li> <article class="definition generic-function callable" id="GENERIC-FUNCTION UBIQUITOUS:AUGMENT"> <header> <span class="visibility">EXTERNAL</span> <span class="type">GENERIC-FUNCTION</span> <h4 class="name"> <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AAUGMENT">AUGMENT</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"> <li class="argument">OBJECT</li>  <li class="argument">FIELD</li>  <li class="argument">SECONDARY</li> </ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/accessor.lisp#L14">Source</a>  </header> <div class="docstring"><pre>Attempts to augment OBJECT on FIELD to be able to host a SECONDARY place.
+
+This is done by (SETF FIELD) a hash-table on the given OBJECT and FIELD. The
+type of SECONDARY decides the hash-table test to use:
+  SYMBOL, INTEGER, CHARACTER          --- EQL
+  STRING, BIT-VECTOR, PATHNAME        --- EQUAL
+  ARRAY, STRUCTURE-OBJECT, HASH-TABLE --- EQUALP
+
+See <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AFIELD" class="xref">FIELD</a></pre></div> </article> </li>  <li> <article class="definition generic-function callable" id="GENERIC-FUNCTION UBIQUITOUS:CALL-WITH-TRANSACTION"> <header> <span class="visibility">EXTERNAL</span> <span class="type">GENERIC-FUNCTION</span> <h4 class="name"> <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3ACALL-WITH-TRANSACTION">CALL-WITH-TRANSACTION</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"> <li class="argument">FUNCTION</li>  <li class="argument">&amp;KEY</li>  <li class="argument">STORAGE</li>  <li class="argument">TYPE</li>  <li class="argument">DESIGNATOR</li> </ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/config.lisp#L70">Source</a>  </header> <div class="docstring"><pre>Calls FUNCTION with *COMMIT* set to NIL and offloads if necessary upon exit.
+
+OFFLOAD is only called if *CHANGED* is non-NIL. Otherwise no change is assumed to
+have taken place and the offload is prevented to avoid unnecessary writing.
+
+The keyword parameters replace the bindings for *STORAGE* *STORAGE-TYPE* and
+*STORAGE-PATHNAME* respectively.
+
+See <a href="#VARIABLE%20UBIQUITOUS%3A%2ACOMMIT%2A" class="xref">*COMMIT*</a>
+See <a href="#VARIABLE%20UBIQUITOUS%3A%2ACHANGED%2A" class="xref">*CHANGED*</a>
+See <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AOFFLOAD" class="xref">OFFLOAD</a></pre></div> </article> </li>  <li> <article class="definition generic-function callable" id="GENERIC-FUNCTION UBIQUITOUS:DEFAULTED-VALUE"> <header> <span class="visibility">EXTERNAL</span> <span class="type">GENERIC-FUNCTION</span> <h4 class="name"> <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3ADEFAULTED-VALUE">DEFAULTED-VALUE</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"> <li class="argument">DEFAULT</li>  <li class="argument">&amp;REST</li>  <li class="argument">PATH</li> </ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/config.lisp#L63">Source</a>  </header> <div class="docstring"><pre>Same as VALUE, but automatically returns and sets DEFAULT if the field cannot be found.
+
+See <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AVALUE" class="xref">VALUE</a></pre></div> </article> </li>  <li> <article class="definition generic-function callable" id="GENERIC-FUNCTION UBIQUITOUS:DESIGNATOR-PATHNAME"> <header> <span class="visibility">EXTERNAL</span> <span class="type">GENERIC-FUNCTION</span> <h4 class="name"> <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3ADESIGNATOR-PATHNAME">DESIGNATOR-PATHNAME</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"> <li class="argument">DESIGNATOR</li>  <li class="argument">TYPE</li> </ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/pathname.lisp#L20">Source</a>  </header> <div class="docstring"><pre>Attempts to automatically find the proper pathname for the given DESIGNATOR and TYPE.
+
+If DESIGNATOR is..
+  An absolute PATHNAME:
+    The pathname is used as-is.
+
+  A relative PATHNAME: 
+    The pathname is merged with that of CONFIG-DIRECTORY.
+
+  A STRING:
+    The string is turned into a pathname by PATHNAME and merged with CONFIG-PATHNAME.
+
+  An uninterned or keyword SYMBOL:
+    The symbol-name is used as the pathname-name and merged with CONFIG-PATHNAME.
+
+  A SYMBOL from the CL package:
+    An error is raised, as in almost all certainty don't want to do this. Using a CL
+    symbol would very likely run you into configuration conflicts with other applications.
+
+  An interned SYMBOL:
+    A pathname with the symbol's package-name as relative directory and the symbol-name
+    as pathname-name is merged with CONFIG-PATHNAME.
+
+Examples:
+(designator-pathname #p&quot;/a&quot; :lisp)   --- #p&quot;/a&quot;
+(designator-pathname #p&quot;a&quot; :lisp)    --- #p&quot;~/.config/common-lisp/ubiquitous/a&quot;
+(designator-pathname &quot;a&quot; :lisp)      --- #p&quot;~/.config/common-lisp/ubiquitous/a.conf.lisp&quot;
+(designator-pathname :foo :lisp)     --- #p&quot;~/.config/common-lisp/ubiquitous/foo.conf.lisp&quot;
+(designator-pathname #:foo :lisp)    --- #p&quot;~/.config/common-lisp/ubiquitous/foo.conf.lisp&quot;
+(designator-pathname 'cl:find :lisp) --- ERROR
+(designator-pathname 'foo:bar :lisp) --- #p&quot;~/.config/common-lisp/ubiquitous/foo/bar.conf.lisp&quot;</pre></div> </article> </li>  <li> <article class="definition generic-function callable" id="GENERIC-FUNCTION UBIQUITOUS:DESTROY"> <header> <span class="visibility">EXTERNAL</span> <span class="type">GENERIC-FUNCTION</span> <h4 class="name"> <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3ADESTROY">DESTROY</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"> <li class="argument">&amp;OPTIONAL</li>  <li class="argument">DESIGNATOR</li>  <li class="argument">TYPE</li> </ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/storage.lisp#L82">Source</a>  </header> <div class="docstring"><pre>Destroys *STORAGE* by deleting its file and restoring it to an empty hash table.
+
+The file used to destroy the storage is calculated by passing
+DESIGNATOR (defaulting to *STORAGE-PATHNAME*) and TYPE (defaulting to
+*STORAGE-TYPE*) to DESIGNATOR-PATHNAME.
+
+This sets *STORAGE*, *STORAGE-TYPE*, *STORAGE-PATHNAME*, and *CHANGED*.
+
+See <a href="#VARIABLE%20UBIQUITOUS%3A%2ASTORAGE%2A" class="xref">*STORAGE*</a>
+See <a href="#VARIABLE%20UBIQUITOUS%3A%2ASTORAGE-TYPE%2A" class="xref">*STORAGE-TYPE*</a>
+See <a href="#VARIABLE%20UBIQUITOUS%3A%2ASTORAGE-PATHNAME%2A" class="xref">*STORAGE-PATHNAME*</a>
+See <a href="#VARIABLE%20UBIQUITOUS%3A%2ACHANGED%2A" class="xref">*CHANGED*</a>
+See <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3ADESIGNATOR-PATHNAME" class="xref">DESIGNATOR-PATHNAME</a></pre></div> </article> </li>  <li> <article class="definition generic-function callable" id="GENERIC-FUNCTION UBIQUITOUS:FIELD"> <header> <span class="visibility">EXTERNAL</span> <span class="type">GENERIC-FUNCTION</span> <h4 class="name"> <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AFIELD">FIELD</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"> <li class="argument">OBJECT</li>  <li class="argument">FIELD</li>  <li class="argument">&amp;OPTIONAL</li>  <li class="argument">DEFAULT</li> </ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/accessor.lisp#L11">Source</a>  </header> <div class="docstring"><pre>Access FIELD on OBJECT if possible. Returns DEFAULT if FIELD is not present.
+The secondary return value is a boolean depicting whether the field could be found.
+
+This is SETF-able. However, while some objects and field combinations may be used
+to read a field, an equivalent SETF method must not necessarily exist.
+
+In the case where the object is a function, the function is called as follows:
+ (field func field default)      =&gt; (funcall func :get field default)
+ (setf (field func field) value) =&gt; (funcall func :set field value) 
+
+Note that if there is no matching method to look up the requested field, an error
+is signalled.</pre></div> </article> </li>  <li> <article class="definition generic-function callable" id="GENERIC-FUNCTION UBIQUITOUS:(SETF FIELD)"> <header> <span class="visibility">EXTERNAL</span> <span class="type">GENERIC-FUNCTION</span> <h4 class="name"> <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3A%28SETF%20FIELD%29">(SETF FIELD)</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"> <li class="argument">VALUE</li>  <li class="argument">OBJECT</li>  <li class="argument">FIELD</li> </ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/accessor.lisp#L12">Source</a>  </header> <div class="docstring"><i>No documentation provided.</i></div> </article> </li>  <li> <article class="definition generic-function callable" id="GENERIC-FUNCTION UBIQUITOUS:FILE"> <header> <span class="visibility">EXTERNAL</span> <span class="type">GENERIC-FUNCTION</span> <h4 class="name"> <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AFILE">FILE</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"> <li class="argument">CONDITION</li> </ul>  </header> <div class="docstring"><pre>To be used on NO-STORAGE-FILE, returns the pathname to the file that could not be found.</pre></div> </article> </li>  <li> <article class="definition generic-function callable" id="GENERIC-FUNCTION UBIQUITOUS:(SETF FILE)"> <header> <span class="visibility">EXTERNAL</span> <span class="type">GENERIC-FUNCTION</span> <h4 class="name"> <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3A%28SETF%20FILE%29">(SETF FILE)</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"> <li class="argument">NEW-VALUE</li>  <li class="argument">CONDITION</li> </ul>  </header> <div class="docstring"><i>No documentation provided.</i></div> </article> </li>  <li> <article class="definition generic-function callable" id="GENERIC-FUNCTION UBIQUITOUS:OFFLOAD"> <header> <span class="visibility">EXTERNAL</span> <span class="type">GENERIC-FUNCTION</span> <h4 class="name"> <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AOFFLOAD">OFFLOAD</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"> <li class="argument">&amp;OPTIONAL</li>  <li class="argument">DESIGNATOR</li>  <li class="argument">TYPE</li>  <li class="argument">STORAGE</li> </ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/storage.lisp#L66">Source</a>  </header> <div class="docstring"><pre>Offloads *STORAGE* by writing it to file.
+
+The file used to read the storage is calculated by passing
+DESIGNATOR (defaulting to *STORAGE-PATHNAME*) and TYPE (defaulting to
+*STORAGE-TYPE*) to DESIGNATOR-PATHNAME.
+
+The file is first written to a temporary one and then renamed to the
+actual file to avoid potential errors or interruptions that would result
+ in a garbled configuration file.
+
+This sets *STORAGE-TYPE*, *STORAGE-PATHNAME*, and *CHANGED*.
+
+During OFFLOAD, the following restarts are active:
+   ABORT  Aborts and does not set any of the usual variables.
+
+See <a href="#VARIABLE%20UBIQUITOUS%3A%2ASTORAGE%2A" class="xref">*STORAGE*</a>
+See <a href="#VARIABLE%20UBIQUITOUS%3A%2ASTORAGE-TYPE%2A" class="xref">*STORAGE-TYPE*</a>
+See <a href="#VARIABLE%20UBIQUITOUS%3A%2ASTORAGE-PATHNAME%2A" class="xref">*STORAGE-PATHNAME*</a>
+See <a href="#VARIABLE%20UBIQUITOUS%3A%2ACHANGED%2A" class="xref">*CHANGED*</a>
+See <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3ADESIGNATOR-PATHNAME" class="xref">DESIGNATOR-PATHNAME</a>
+See <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AWRITE-STORAGE" class="xref">WRITE-STORAGE</a></pre></div> </article> </li>  <li> <article class="definition generic-function callable" id="GENERIC-FUNCTION UBIQUITOUS:READ-STORAGE"> <header> <span class="visibility">EXTERNAL</span> <span class="type">GENERIC-FUNCTION</span> <h4 class="name"> <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AREAD-STORAGE">READ-STORAGE</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"> <li class="argument">TYPE</li>  <li class="argument">STREAM</li> </ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/storage.lisp#L13">Source</a>  </header> <div class="docstring"><pre>Reads a storage object from STREAM, which must be stored in a format suitable for TYPE.
+Returns the read storage object.</pre></div> </article> </li>  <li> <article class="definition generic-function callable" id="GENERIC-FUNCTION UBIQUITOUS:REMFIELD"> <header> <span class="visibility">EXTERNAL</span> <span class="type">GENERIC-FUNCTION</span> <h4 class="name"> <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AREMFIELD">REMFIELD</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"> <li class="argument">OBJECT</li>  <li class="argument">FIELD</li> </ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/accessor.lisp#L13">Source</a>  </header> <div class="docstring"><pre>Removes FIELD from OBJECT if possible.
+The secondary return value is a boolean depicting whether the field was removed.
+
+In the case where the object is a function, the function is called as follows:
+  (remfield func field)          =&gt; (funcall func :remove field)
+
+Note that if there is no matching method to look up the requested field, an error
+is signalled.</pre></div> </article> </li>  <li> <article class="definition generic-function callable" id="GENERIC-FUNCTION UBIQUITOUS:REMVALUE"> <header> <span class="visibility">EXTERNAL</span> <span class="type">GENERIC-FUNCTION</span> <h4 class="name"> <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AREMVALUE">REMVALUE</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"> <li class="argument">&amp;REST</li>  <li class="argument">PATH</li> </ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/config.lisp#L41">Source</a>  </header> <div class="docstring"><pre>Removes the value denoted by the PATH.
+The secondary return value is a boolean depicting whether the field could be found.
+
+First traverses *STORAGE* until the last field in PATH by FIELD, then uses REMFIELD
+on the last remaining field. If no PATH is given, the *STORAGE* is reset to an empty
+hash-table.
+
+See <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AFIELD" class="xref">FIELD</a>
+See <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AREMFIELD" class="xref">REMFIELD</a></pre></div> </article> </li>  <li> <article class="definition generic-function callable" id="GENERIC-FUNCTION UBIQUITOUS:RESTORE"> <header> <span class="visibility">EXTERNAL</span> <span class="type">GENERIC-FUNCTION</span> <h4 class="name"> <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3ARESTORE">RESTORE</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"> <li class="argument">&amp;OPTIONAL</li>  <li class="argument">DESIGNATOR</li>  <li class="argument">TYPE</li> </ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/storage.lisp#L47">Source</a>  </header> <div class="docstring"><pre>Restores *STORAGE* by reading it from file if possible and returns it.
+
+The file used to read the storage is calculated by passing
+DESIGNATOR (defaulting to *STORAGE-PATHNAME*) and TYPE (defaulting to
+*STORAGE-TYPE*) to DESIGNATOR-PATHNAME. If it exists, a stream is opened
+and subsequently passed to READ-STORAGE. The result thereof is used as
+the new storage object. If it does not exist, a warning of type 
+NO-STORAGE-FILE is signalled and a new EQUAL hash-table is used for the
+storage object (unless a restart is invoked of course).
+
+This sets *STORAGE*, *STORAGE-TYPE*, *STORAGE-PATHNAME*, and *CHANGED*.
+
+During OFFLOAD, the following restarts are active:
+  USE-NEW-STORAGE  Takes one argument to use as the new storage instead.
+  ABORT            Aborts and does not set any of the usual variables.
+
+See <a href="#VARIABLE%20UBIQUITOUS%3A%2ASTORAGE%2A" class="xref">*STORAGE*</a>
+See <a href="#VARIABLE%20UBIQUITOUS%3A%2ASTORAGE-TYPE%2A" class="xref">*STORAGE-TYPE*</a>
+See <a href="#VARIABLE%20UBIQUITOUS%3A%2ASTORAGE-PATHNAME%2A" class="xref">*STORAGE-PATHNAME*</a>
+See <a href="#VARIABLE%20UBIQUITOUS%3A%2ACHANGED%2A" class="xref">*CHANGED*</a>
+See <a href="#CONDITION%20UBIQUITOUS%3ANO-STORAGE-FILE" class="xref">NO-STORAGE-FILE</a>
+See <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3ADESIGNATOR-PATHNAME" class="xref">DESIGNATOR-PATHNAME</a>
+See <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AREAD-STORAGE" class="xref">READ-STORAGE</a></pre></div> </article> </li>  <li> <article class="definition generic-function callable" id="GENERIC-FUNCTION UBIQUITOUS:VALUE"> <header> <span class="visibility">EXTERNAL</span> <span class="type">GENERIC-FUNCTION</span> <h4 class="name"> <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AVALUE">VALUE</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"> <li class="argument">&amp;REST</li>  <li class="argument">PATH</li> </ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/config.lisp#L12">Source</a>  </header> <div class="docstring"><pre>Traverses *STORAGE* by the fields in PATH and returns the value if it can be found.
+The secondary return value is a boolean depicting whether the field could be found.
+
+This is SETF-able. If a PATH is set that is made up of fields that do not exist yet,
+then these fields are automatically created as necessary (if possible) by usage of
+AUGMENT. Setting with no PATH given sets the value of *STORAGE*. After setting a value,
+OFFLOAD is called, unless *COMMIT* is NIL
+
+See <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AFIELD" class="xref">FIELD</a>
+See <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AAUGMENT" class="xref">AUGMENT</a>
+See <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AOFFLOAD" class="xref">OFFLOAD</a>
+See <a href="#VARIABLE%20UBIQUITOUS%3A%2ACOMMIT%2A" class="xref">*COMMIT*</a></pre></div> </article> </li>  <li> <article class="definition generic-function callable" id="GENERIC-FUNCTION UBIQUITOUS:(SETF VALUE)"> <header> <span class="visibility">EXTERNAL</span> <span class="type">GENERIC-FUNCTION</span> <h4 class="name"> <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3A%28SETF%20VALUE%29">(SETF VALUE)</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"> <li class="argument">VALUE</li>  <li class="argument">&amp;REST</li>  <li class="argument">PATH</li> </ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/config.lisp#L22">Source</a>  </header> <div class="docstring"><i>No documentation provided.</i></div> </article> </li>  <li> <article class="definition generic-function callable" id="GENERIC-FUNCTION UBIQUITOUS:WRITE-STORAGE"> <header> <span class="visibility">EXTERNAL</span> <span class="type">GENERIC-FUNCTION</span> <h4 class="name"> <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3AWRITE-STORAGE">WRITE-STORAGE</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"> <li class="argument">TYPE</li>  <li class="argument">STREAM</li>  <li class="argument">STORAGE</li> </ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/storage.lisp#L14">Source</a>  </header> <div class="docstring"><pre>Writes the STORAGE object to STREAM in a format suitable for TYPE.
+Returns the written STORAGE object.</pre></div> </article> </li>  <li> <article class="definition macro callable" id="MACRO-FUNCTION UBIQUITOUS:DEFINE-UBIQUITOUS-READER"> <header> <span class="visibility">EXTERNAL</span> <span class="type">MACRO</span> <h4 class="name"> <a href="#MACRO-FUNCTION%20UBIQUITOUS%3ADEFINE-UBIQUITOUS-READER">DEFINE-UBIQUITOUS-READER</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"> <li class="argument">TYPE</li>  <li class="argument">(FORM)</li>  <li class="argument">&amp;BODY</li>  <li class="argument">BODY</li> </ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/storage.lisp#L129">Source</a>  </header> <div class="docstring"><pre>Define a new function that produces an object of TYPE by parsing the read FORM.</pre></div> </article> </li>  <li> <article class="definition macro callable" id="MACRO-FUNCTION UBIQUITOUS:DEFINE-UBIQUITOUS-WRITER"> <header> <span class="visibility">EXTERNAL</span> <span class="type">MACRO</span> <h4 class="name"> <a href="#MACRO-FUNCTION%20UBIQUITOUS%3ADEFINE-UBIQUITOUS-WRITER">DEFINE-UBIQUITOUS-WRITER</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"> <li class="argument">TYPE</li>  <li class="argument">(OBJECT &amp;OPTIONAL (PRIORITY))</li>  <li class="argument">&amp;BODY</li>  <li class="argument">BODY</li> </ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/storage.lisp#L121">Source</a>  </header> <div class="docstring"><pre>Define a new function that produces a list of objects to be written to reproduce OBJECT of TYPE.</pre></div> </article> </li>  <li> <article class="definition macro callable" id="MACRO-FUNCTION UBIQUITOUS:WITH-LOCAL-STORAGE"> <header> <span class="visibility">EXTERNAL</span> <span class="type">MACRO</span> <h4 class="name"> <a href="#MACRO-FUNCTION%20UBIQUITOUS%3AWITH-LOCAL-STORAGE">WITH-LOCAL-STORAGE</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"> <li class="argument">(DESIGNATOR &amp;KEY (TYPE) (STORAGE) (TRANSACTION))</li>  <li class="argument">&amp;BODY</li>  <li class="argument">BODY</li> </ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/storage.lisp#L31">Source</a>  </header> <div class="docstring"><pre>Useful for completely encapsulating the storage in a local block.
+
+Unlike WITH-STORAGE, this also binds the *STORAGE-TYPE* and
+*STORAGE-PATHNAME*. If TRANSACTION is non-NIL, WITH-TRANSACTION is
+used, and otherwise a simple LET*. STORAGE defaults to the LAZY-LOADER
+function, meaning that if the storage is never accessed, it is never
+loaded to begin with. This, along with WITH-TRANSACTION can be a
+good optimisation to avoid unnecessary disk access.
+
+See <a href="#VARIABLE%20UBIQUITOUS%3A%2ASTORAGE%2A" class="xref">*STORAGE*</a>
+See <a href="#VARIABLE%20UBIQUITOUS%3A%2ASTORAGE-TYPE%2A" class="xref">*STORAGE-TYPE*</a>
+See <a href="#VARIABLE%20UBIQUITOUS%3A%2ASTORAGE-PATHNAME%2A" class="xref">*STORAGE-PATHNAME*</a>
+See <a href="#MACRO-FUNCTION%20UBIQUITOUS%3AWITH-TRANSACTION" class="xref">WITH-TRANSACTION</a>
+See <a href="#FUNCTION%20UBIQUITOUS%3ALAZY-LOADER" class="xref">LAZY-LOADER</a></pre></div> </article> </li>  <li> <article class="definition macro callable" id="MACRO-FUNCTION UBIQUITOUS:WITH-STORAGE"> <header> <span class="visibility">EXTERNAL</span> <span class="type">MACRO</span> <h4 class="name"> <a href="#MACRO-FUNCTION%20UBIQUITOUS%3AWITH-STORAGE">WITH-STORAGE</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"> <li class="argument">(STORAGE)</li>  <li class="argument">&amp;BODY</li>  <li class="argument">BODY</li> </ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/storage.lisp#L20">Source</a>  </header> <div class="docstring"><pre>Binds *STORAGE* to the given STORAGE object, ensuring a local configuration.</pre></div> </article> </li>  <li> <article class="definition macro callable" id="MACRO-FUNCTION UBIQUITOUS:WITH-TRANSACTION"> <header> <span class="visibility">EXTERNAL</span> <span class="type">MACRO</span> <h4 class="name"> <a href="#MACRO-FUNCTION%20UBIQUITOUS%3AWITH-TRANSACTION">WITH-TRANSACTION</a> </h4> <ul class="qualifiers"></ul> <ul class="arguments"> <li class="argument">(&amp;KEY STORAGE TYPE DESIGNATOR)</li>  <li class="argument">&amp;BODY</li>  <li class="argument">BODY</li> </ul>  <a class="source-link" href="https://github.com/Shinmera/ubiquitous/blob/master/config.lisp#L81">Source</a>  </header> <div class="docstring"><pre>Executes BODY within a transaction.
+
+See <a href="#GENERIC-FUNCTION%20UBIQUITOUS%3ACALL-WITH-TRANSACTION" class="xref">CALL-WITH-TRANSACTION</a></pre></div> </article> </li> </ul> </article> </li> </ul> </section> </article> <script>window.addEventListener("DOMContentLoaded", function(){
+    var unmarkElement = function(el){
+        if(el.tagName === "mark" || el.tagName === "MARK"){
+            [].forEach.call(el.childNodes, function(child){
+                el.parentNode.insertBefore(child, el);
+            });
+            el.parentNode.removeChild(el);
+        }else if(el.parentNode.tagName === "mark"){
+            return unmarkElement(el.parentNode);
+        }
+        return null;
+    }
+
+    var unmarkAll = function(root){
+        root = root || document;
+        [].forEach.call(root.querySelectorAll("mark"), unmarkElement);
+    }
+    
+    var markElement = function(el){
+        if(el.parentNode.tagName === "mark" || el.parentNode.tagName === "MARK"){
+            return el.parentNode;
+        } else {
+            unmarkAll();
+            var marked = document.createElement("mark");
+            el.parentNode.insertBefore(marked, el);
+            marked.appendChild(el);
+            return marked;
+        }
+    }
+
+    var markFragmented = function(){
+        if(window.location.hash){
+            var el = document.getElementById(decodeURIComponent(window.location.hash.substr(1)));
+            if(el) markElement(el);
+        }
+    }
+
+    var registerXrefLink = function(link){
+        var el = document.getElementById(decodeURIComponent(link.getAttribute("href").substr(1)));
+        if(el){
+            link.addEventListener("click", function(){
+                markElement(el);
+            });
+        }
+    }
+
+    var registerXrefLinks = function(root){
+        root = root || document;
+        [].forEach.call(root.querySelectorAll("a.xref"), registerXrefLink);
+    }
+
+    markFragmented();
+    registerXrefLinks();
+}); </script> </body> </html> 
