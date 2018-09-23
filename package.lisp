@@ -26,6 +26,7 @@
   (:export
    #:config-directory
    #:config-pathname
+   #:package-directory
    #:designator-pathname)
   ;; storage.lisp
   (:export

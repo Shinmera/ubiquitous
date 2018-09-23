@@ -6,7 +6,7 @@
 
 
 (asdf:defsystem ubiquitous
-  :version "1.2.3"
+  :version "1.2.4"
   :license "Artistic"
   :author "Nicolas Hafner <shinmera@tymoon.eu>"
   :maintainer "Nicolas Hafner <shinmera@tymoon.eu>"

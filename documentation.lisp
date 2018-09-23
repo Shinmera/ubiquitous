@@ -122,6 +122,20 @@ On other systems   (USER-HOMEDIR-PATHNAME)/.config/common-lisp/ubiquitous")
 
 See CONFIG-DIRECTORY")
 
+  (package-directory
+   "Returns the directory for config files suitable for this package.
+
+By default:
+For the CL package, an error is signalled.
+For the KEYWORD and NIL packages, the CONFIG-DIRECTORY is returned.
+Otherwise, a subdirectory within the CONFIG-DIRECTORY is returned according to the
+package's name.
+
+The user may add methods to this function to customise the behaviour of their own
+packages.
+
+See CONFIG-DIRECTORY")
+
   (designator-pathname
    "Attempts to automatically find the proper pathname for the given DESIGNATOR and TYPE.
 
@@ -135,16 +149,9 @@ If DESIGNATOR is..
   A STRING:
     The string is turned into a pathname by PATHNAME and merged with CONFIG-PATHNAME.
 
-  An uninterned or keyword SYMBOL:
-    The symbol-name is used as the pathname-name and merged with CONFIG-PATHNAME.
-
-  A SYMBOL from the CL package:
-    An error is raised, as in almost all certainty don't want to do this. Using a CL
-    symbol would very likely run you into configuration conflicts with other applications.
-
-  An interned SYMBOL:
-    A pathname with the symbol's package-name as relative directory and the symbol-name
-    as pathname-name is merged with CONFIG-PATHNAME.
+  A SYMBOL:
+    A pathname with the symbol's symbol-name as pathname-name, the CONFIG-PATHNAME's
+    pathname-type, and the defaults from PACKAGE-PATHNAME is constructed.
 
 Examples:
 (designator-pathname #p\"/a\" :lisp)   --- #p\"/a\"
@@ -153,7 +160,10 @@ Examples:
 (designator-pathname :foo :lisp)     --- #p\"~/.config/common-lisp/ubiquitous/foo.conf.lisp\"
 (designator-pathname #:foo :lisp)    --- #p\"~/.config/common-lisp/ubiquitous/foo.conf.lisp\"
 (designator-pathname 'cl:find :lisp) --- ERROR
-(designator-pathname 'foo:bar :lisp) --- #p\"~/.config/common-lisp/ubiquitous/foo/bar.conf.lisp\""))
+(designator-pathname 'foo:bar :lisp) --- #p\"~/.config/common-lisp/ubiquitous/foo/bar.conf.lisp\"
+
+See PACKAGE-PATHNAME
+See CONFIG-DIRECTORY"))
 
 ;; storage.lisp
 (setdocs
