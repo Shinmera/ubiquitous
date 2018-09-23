@@ -25,6 +25,19 @@
         (T
          (merge-pathnames designator (config-directory)))))
 
+
+(defun split (string separator)
+  "Returns a list of strings, splitting by given character"
+  (check-type string string)
+  (check-type separator character)
+  (loop for i = 0 then (1+ j)
+        as j = (position separator string
+                         :start i
+                         :test #'char=)
+        collect (subseq string i j)
+        while j))
+
+
 (defmethod designator-pathname ((designator symbol) type)
   (cond ((eq (symbol-package designator) (find-package '#:cl))
          (error "Do not use symbols from the CL package for storage!"))
@@ -32,7 +45,11 @@
              (eq (symbol-package designator) NIL))
          (make-pathname :name (string-downcase designator) :defaults (config-pathname type)))
         (T
-         (merge-pathnames (make-pathname :directory `(:relative ,(string-downcase (package-name (symbol-package designator))))
+         (merge-pathnames (make-pathname :directory (list* :relative (split
+                                                                      (string-downcase
+                                                                       (package-name
+                                                                        (symbol-package designator)))
+                                                                      #\/))
                                          :name (string-downcase designator))
                           (config-pathname type)))))
 
