@@ -236,7 +236,8 @@
     (read stream)))
 
 (defmethod write-storage ((type (eql :lisp)) stream storage)
-  (let ((*readtable* *ubiquitous-read-table*))
+  (let ((*readtable* *ubiquitous-read-table*)
+        (*package* (find-package "KEYWORD")))
     (write storage
            :stream stream
            :array T
