@@ -4,9 +4,8 @@
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-
 (asdf:defsystem ubiquitous
-  :version "1.2.4"
+  :version "2.0.0"
   :license "Artistic"
   :author "Nicolas Hafner <shinmera@tymoon.eu>"
   :maintainer "Nicolas Hafner <shinmera@tymoon.eu>"
