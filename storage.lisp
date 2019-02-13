@@ -96,12 +96,17 @@
 (defvar *ubiquitous-readers* (make-hash-table :test 'eql))
 (defvar *ubiquitous-char* "[]")
 
+(define-condition unknown-reader-type (error)
+  ((type :initarg :reader-type :initform (error "READER-TYPE required.") :reader reader-type))
+  (:report (lambda (c s) (format s "Don't know how to read ~s"
+                                 (reader-type c)))))
+
 (progn
   (defun ubiquitous-reader (stream c)
     (declare (ignore c))
     (destructuring-bind (type . args) (read-delimited-list (char *ubiquitous-char* 1) stream T)
       (funcall (or (gethash type *ubiquitous-readers*)
-                   (error "Don't know how to read ~s" type))
+                   (error 'unknown-reader-type :reader-type type))
                args)))
   (set-macro-character (char *ubiquitous-char* 0) #'ubiquitous-reader NIL *ubiquitous-read-table*)
   (set-macro-character (char *ubiquitous-char* 1) (get-macro-character #\)) NIL *ubiquitous-read-table*))

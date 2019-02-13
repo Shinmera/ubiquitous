@@ -44,5 +44,7 @@
    #:restore
    #:offload
    #:destroy
+   #:unknown-reader-type
+   #:reader-type
    #:define-ubiquitous-writer
    #:define-ubiquitous-reader))

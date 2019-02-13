@@ -311,8 +311,25 @@ See DESIGNATOR-PATHNAME")
   ((*ubiquitous-char* variable)
    "A string of two characters denoting the start and end of a special construct.")
 
+  ((unknown-reader-type type)
+   "Error signalled if an unknown structure type is encountered in the config.
+
+See READER-TYPE
+See UBIQUITOUS-READER")
+
+  (reader-type
+   "Returns the type that was attempted to be read.
+
+See UNKNOWN-READER-TYPE")
+
   (ubiquitous-reader
-   "Reader function invoked when encountering the first character of *UBIQUITOUS-CHAR*.")
+   "Reader function invoked when encountering the first character of *UBIQUITOUS-CHAR*.
+
+This dispatches to the proper reader for the structure's type. If an
+unknown type is encountered, an error of type UNKNOWN-READER-TYPE is
+signalled.
+
+See UNKNOWN-READER-TYPE")
 
   (ubiquitous-writer
    "Function to pretty print a generalised FORM to STREAM.
