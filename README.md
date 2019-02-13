@@ -39,6 +39,19 @@ By default Ubiquitous does not try to handle concurrent access in any way. The r
 
 This will still work irregardless of how many different storage objects you use, as the locking on the operations happens on the currently accessed storage object itself, rather than on a global lock. In order to avoid needless locking and unlocking, you should bundle your operations into a `with-transaction` block, which will only perform a lock once.
 
+## Metadata
+Since version 2.0, Ubiquitous will output a metadata header into the configuration file. It will typically have the following structure:
+
+```
+; meta (:version 1.0 :package "CL-USER")
+```
+
+The purpose of this header is to ensure print/read consistency. When `offload`ing, the current `*package*` is output into the header, so that when the configuration is `restore`d, unqualified symbols in the configuration are read with the same home package as they were printed with.
+
+If the header is missing your configuration will still read fine, and since it is a comment, configurations will still be compatible when read with version 1.0 of Ubiquitous. An error is however signalled if the header is malformed, or the referred package cannot be found.
+
+If you implement your own storage format, you should ensure that you output and respect the same header, or a similar header. See `maybe-read-metadata`, `with-processed-metadata`, `print-metadata`, and related functions.
+
 ## Shortcomings
 A couple of shortcomings exist in Ubiquitous, almost by necessity. As you might know out of experience, certain modifying operations are not possible to do without being able to modify the container of the object itself. As an example, `pop`ing an element off the head of the list requires setting the variable that contains the list, rather than the list itself. This sort of thing is rather annoying to model in a generic manner without complicating the common case needlessly. Furthermore, in a couple of instances ambiguity arises due to multiple actions being possible.
 

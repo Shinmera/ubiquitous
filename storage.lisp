@@ -237,10 +237,12 @@
   (find-package (first form)))
 
 (defmethod read-storage ((type (eql :lisp)) stream)
-  (let ((*readtable* *ubiquitous-read-table*))
-    (read stream)))
+  (with-processed-metadata (maybe-read-metadata stream)
+    (let* ((*readtable* *ubiquitous-read-table*))
+      (read stream))))
 
 (defmethod write-storage ((type (eql :lisp)) stream storage)
+  (print-metadata stream)
   (let ((*readtable* *ubiquitous-read-table*))
     (write storage
            :stream stream

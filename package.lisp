@@ -22,6 +22,23 @@
    #:defaulted-value
    #:call-with-transaction
    #:with-transaction)
+  ;; metadata.lisp
+  (:export
+   #:*metadata-version*
+   #:*metadata-prefix*
+   #:metadata-condition
+   #:unknown-version
+   #:version
+   #:bad-configuration-package
+   #:bad-package-name
+   #:bad-metadata-header
+   #:header
+   #:find-metadata-package
+   #:process-metadata
+   #:generate-metadata
+   #:maybe-read-metadata
+   #:print-metadata
+   #:with-processed-metadata)
   ;; pathname.lisp
   (:export
    #:config-directory

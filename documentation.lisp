@@ -109,6 +109,128 @@ See OFFLOAD")
 
 See CALL-WITH-TRANSACTION"))
 
+;; metadata.lisp
+(setdocs
+  ((*metadata-version* variable)
+   "The current version of the configuration metadata.
+
+Should be a float.")
+  
+  ((*metadata-prefix* variable)
+   "The prefix that is used to recognise the metadata header.")
+
+  ((metadata-condition type)
+   "Superclass for conditions related to configuration metadata.")
+
+  ((unknown-version type)
+   "Warning signalled when the metadata header contains an unknown version number.
+
+See VERSION
+See METADATA-CONDITION")
+
+  (version
+   "Returns the version captured by the condition.
+
+See UNKNOWN-VERSION")
+
+  ((bad-configuration-package type)
+   "Error signalled when the metadata header refers to an unknown package.
+
+See BAD-PACKAGE-NAME
+See METADATA-CONDITION")
+
+  (bad-package-name
+   "Returns the bad package name that the condition captured.
+
+See BAD-CONFIGURATION-PACKAGE")
+
+  ((bad-metadata-header type)
+   "Error signalled when the metadata header is malformed.
+
+See HEADER
+See METADATA-CONDITION")
+
+  (header
+   "Returns the header that is malformed.
+
+See BAD-METADATA-HEADER")
+
+  (find-metadata-package
+   "Attempt to find a package of the given name for metadata package resolution.
+
+This is like FIND-PACKAGE, except that it signals an error of type
+BAD-CONFIGURATION-PACKAGE if no package could be found, and establishes
+the USE-VALUE and CONTINUE restarts to recover from the error.
+
+USE-VALUE lets you pass a package designator to use in place. Note that
+if you do not pass a PACKAGE object, it will re-test the designator the
+same way.
+
+CONTINUE will instead use the current *PACKAGE*. 
+
+Note that using an alternate package may lead to symbols with the wrong
+home package in the processed configuration.
+
+See BAD-CONFIGURATION-PACKAGE")
+
+  (check-metadata
+   "Checks whether the read metadata structure is valid.
+
+Namely an error of type BAD-METADATA-HEADER is signalled if the metadata
+is not a list, and is not a proper plist.
+
+See BAD-METADATA-HEADER")
+
+  (process-metadata
+   "Processes the metadata and applies its effects.
+
+This may signal conditions if the metadata is malformed, or the current
+environment is not agreeable. Two restarts are established to recover:
+
+USE-VALUE allows you to supply alternate metadata. The metadata is then
+processed in place of the original.
+
+CONTINUE will simply ignore the metadata and return successfully.
+
+See CHECK-METADATA
+See BAD-METADATA-HEADER
+See BAD-CONFIGURATION-PACKAGE
+See UNKNOWN-VERSION")
+
+  (generate-metadata
+   "Generates valid metadata for the current environment.")
+
+  (prefix-p
+   "Returns T if the PREFIX is a prefix of STRING.")
+
+  (maybe-read-metadata
+   "Attempts to read a metadata line from the stream.
+
+If the data at the current stream starts with *METADATA-PREFIX*, the line is
+consumed and read. The read metadata structure is returned. If reading fails,
+an error of type BAD-METADATA-HEADER is signalled.
+
+See *METADATA-PREFIX*
+See BAD-METADATA-HEADER")
+
+  (print-metadata
+   "Writes a metadata header to the stream.
+
+Writes a valid metadata header line to the stream, with the METADATA as the
+header contents. The header will start with *METADATA-PREFIX* and will only
+consume a single line.
+
+See *METADATA-PREFIX*
+See GENERATE-METADATA")
+
+  ((with-processed-metadata)
+   "Wraps the body in an environment where metadata can be safely applied and processes the given metadata within.
+
+At the moment, this simply binds *PACKAGE* to ensure the package indicated
+by the metadata can be applied without influencing the surrounding environment.
+
+See PROCESS-METADATA"))
+
 ;; pathname.lisp
 (setdocs
   (config-directory

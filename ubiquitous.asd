@@ -16,6 +16,7 @@
   :components ((:file "package")
                (:file "pathname")
                (:file "accessor")
+               (:file "metadata")
                (:file "storage")
                (:file "config")
                (:file "documentation"))
