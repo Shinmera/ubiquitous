@@ -51,7 +51,7 @@
       (merge-pathnames (make-pathname :directory '(:relative "common-lisp" "ubiquitous")) config))))
 
 (defun config-pathname (type)
-  (make-pathname :type (format NIL "conf.~(~a~)" type) :defaults (config-directory)))
+  (make-pathname :type #-clisp (format NIL "conf.~(~a~)" type) #+clisp "lisp" :defaults (config-directory)))
 
 (defun split-package-name (package)
   (let ((parts ())
