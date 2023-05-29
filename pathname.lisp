@@ -42,7 +42,7 @@
                    (null)
                    (pathname (return arg))
                    (string (when (string/= "" arg)
-                             (return (parse-namestring arg))))))))
+                             (return (make-pathname :directory arg))))))))
     (let ((config (or* (getenv "UBIQUITOUS_HOME")
                        #+(or windows win32 mswindows)
                        (getenv "APPDATA")
