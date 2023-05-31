@@ -115,13 +115,6 @@
                          ((string= "." dirname))
                          ((string= ".." dirname)
                           (push :back directory))
-                         ((and (char= #\% (char dirname 0))
-                               (char= #\% (char dirname (1- (length dirname))))
-                               (< 2 (length dirname))
-                               (equal '(:relative) directory))
-                          ;; Resolve the envvar
-                          (let ((var (or (getenv (subseq dirname 1 (1- (length dirname)))) "")))
-                            (setf base (parse-dos-namestring var :as :directory :junk-allowed junk-allowed))))
                          (T (push dirname directory))))))
           (loop for i from start below (length namestring)
                 for char = (char namestring i)
