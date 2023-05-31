@@ -138,7 +138,7 @@
                (null)
                (pathname (return arg))
                (string (when (string/= "" arg)
-                         (return (parse-native-namestring arg :as :directory))))))))
+                         (return (parse-native-namestring arg :as :directory :junk-allowed T))))))))
     (let ((config (or* (getenv "UBIQUITOUS_HOME")
                        #+(or windows win32 mswindows)
                        (getenv "APPDATA")
