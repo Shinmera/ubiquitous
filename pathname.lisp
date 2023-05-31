@@ -35,14 +35,61 @@
   #-(or abcl allegro clasp clisp clozure cmucl cormanlisp ecl gcl genera lispworks mcl mkcl sbcl scl xcl)
   NIL)
 
+(defun parse-native-namestring (namestring &key (as :file) junk-allowed)
+  #+windows (parse-dos-namestring namestring :as as :junk-allowed junk-allowed)
+  #+unix (parse-unix-namestring namestring :as as :junk-allowed junk-allowed)
+  #-(or windows unix)
+  (let ((path (parse-namestring namestring NIL *default-pathname-defaults* :junk-allowed junk-allowed)))
+    (if (and (eql :directory as)
+             (or (pathname-name path) (pathname-type path)))
+        (make-pathname :directory (append (pathname-directory path) (list (format NIL "~a~@[.~a~]" (pathname-name path) (pathname-type path)))))
+        path)))
+
+(defun parse-unix-namestring (namestring &key (as :file) junk-allowed)
+  (if (string= "" namestring)
+      #p""
+      (let ((base (case (char namestring 0)
+                    (#\~ '(:home :absolute))
+                    (#\/ '(:absolute))
+                    (T '(:relative))))
+            (buf (make-string-output-stream))
+            (name NIL)
+            (type NIL))
+        (flet ((push-file ()
+                 (let* ((leftover (get-output-stream-string buf))
+                        (dot (position #\. leftover :from-end T)))
+                   (when (string/= "" leftover)
+                     (case dot
+                       ((0 NIL) (setf name leftover))
+                       (T (setf name (subseq leftover 0 dot)
+                                type (subseq leftover (1+ dot))))))))
+               (push-dir ()
+                 (let* ((dirname (get-output-stream-string buf)))
+                   (cond ((string= "" dirname))
+                         ((string= "." dirname))
+                         ((string= ".." dirname) (push :back base))
+                         (T (push dirname base))))))
+          (loop for i from (if (eql :relative (first base)) 0 1) below (length namestring)
+                for char = (char namestring i)
+                do (case char
+                     (#\/ (push-dir))
+                     (#\Nul (unless junk-allowed
+                              (cerror "Ignore the character" "Illegal character ~c in namestring:~%  ~a"
+                                      char namestring)))
+                     (T (write-char char buf)))
+                finally (ecase as
+                          (:file (push-file))
+                          (:directory (push-dir)))))
+        (make-pathname :name name :type type :directory (unless (equal base '(:relative)) (reverse base))))))
+
 (defun config-directory ()
   (flet ((or* (&rest args)
            (loop for arg in args do
-                 (typecase arg
-                   (null)
-                   (pathname (return arg))
-                   (string (when (string/= "" arg)
-                             (return (make-pathname :directory arg))))))))
+             (typecase arg
+               (null)
+               (pathname (return arg))
+               (string (when (string/= "" arg)
+                         (return (parse-native-namestring arg :as :directory))))))))
     (let ((config (or* (getenv "UBIQUITOUS_HOME")
                        #+(or windows win32 mswindows)
                        (getenv "APPDATA")
