@@ -4,7 +4,7 @@
   :author "Yukari Hafner <shinmera@tymoon.eu>"
   :maintainer "Yukari Hafner <shinmera@tymoon.eu>"
   :description "An extension to ubiquitous providing concurrency support."
-  :homepage "https://github.com/Shinmera/ubiquitous"
+  :homepage "https://shinmera.com/project/ubiquitous"
   :serial T
   :components ((:file "concurrent"))
   :depends-on (:ubiquitous
